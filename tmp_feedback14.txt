@@ -1,0 +1,100 @@
+====================================
+== Feedback from Ralph Matthes    ==
+====================================
+
+Dear Ki Yung,
+
+Two weeks have passed, and the deadline for TYPES'14 is now very close (although certainly a bit extensible on demand). After a two-day project meeting that I organised, I could finally take a look. While I did not yet try to solve the question you were particularly interested in, I can propose a clean general solution for Section 5, i.e., the impredicative encoding of Mendler-style iteration with static inverse. The definition of In'_* will certainly have to analyze the datatype functor F, but this could be done just the way I did it for positive and negative occurrences in my PTCS 2001 paper. There is no need to explicitly mark negative occurrences (which you sketch on p.17 for another purpose).
+
+@inproceedings{DBLP:conf/dagstuhl/Matthes01,
+  author    = {Ralph Matthes},
+  title     = {Interpolation for Natural Deduction with Generalized Eliminations},
+  booktitle = {Proof Theory in Computer Science, International Seminar, {PTCS} 2001,
+               Dagstuhl Castle, Germany, October 7-12, 2001, Proceedings},
+  year      = {2001},
+  pages     = {153--169},
+  crossref  = {DBLP:conf/dagstuhl/2001ptcs},
+  url       = {http://dx.doi.org/10.1007/3-540-45504-3_10},
+  doi       = {10.1007/3-540-45504-3_10},
+  timestamp = {Fri, 12 Sep 2014 15:07:21 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/dagstuhl/Matthes01},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+I tried it out on your example of HOAS. I think this would make it easy to lift the discussion in 5.3 and 5.4 to the level of results. If it was just about giving a definition and no analysis of its behaviour, it would be sufficient to say that lift phi' and inl form a logical equivalence  and that all type constructors preserve logical equivalence, allowing thus to pass from the type of argument x to the type F(KA) needed as argument of phi' eta^-1.
+
+What do you think? Maybe your paper has very much changed since I downloaded it on September 2 (perhaps, you even had already modified your version by then).
+
+Best,    Ralph
+
+
+
+====================================
+=== Reviews from post-TYPES '14 ====
+====================================
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 3
+TITLE: Mendler-style recursion schemes for mixed-variant datatypes
+AUTHORS: Ki Yung Ahn, Tim Sheard and Marcelo Fiore
+
+
+----------- REVIEW -----------
+The goal of the paper is to extend Mendler-style recursive types to definition with negative occurrences of the recursive type parameter.
+The usefulness of the device is illustrated by the application to Higher Order Abstract Syntax encoding of untyped and simply typed lambda-calculus.
+
+Usually, such higher order syntax representations have the problem of instantiating binding terms (given by metafunctions on expression). The trick used here is to introduce a formal inverse constructor that inject all possible value of recursive functions into the term algebra. This result type is polymorphically abstracted, therefore it is impossible for the user to actually employ the inverse constructor to define concrete terms. The inverse can instead be used at the moment of evaluating a term to obtain a result in that type.
+
+It is a nice idea and it seems to provide elegant formalizations.
+Following the technical details is a bit challenging in some points, so I would like the authors to provide more clear intuitive explanations.
+
+The main device in defining Mendler type inductive types for type operator with negative occurrences is a constructor "Inverse" that injects the result values of recursive functions into the type. This is reflected in the type Phi' of the recursion step, which has an extra component (a -> r a). However, when we look at the implementation of msfit, we see that this is always instantiated by Inverse. So I don't see the need to generalize it in Phi'. You can just leave it out and let the user directly employ Inverse in the definition of phi.
+
+I feel that the role of this formal inverse must be clarified further. On pg.6, the sentence beginning "Instead of using actual inverse functions ..." is not clear. It seem to implicitly assume that inverse functions exists: one can always recompute the element of the recursive type from the result of the recursive function, which is obviously false. With the formal inverse, we force the existence of a left inverse of every recursive function. As the example illustrates, this allows us to provide trivial instantiations for negative occurrences of the the type variable in the inductive definition.
+
+It should be stressed, maybe in relation to the example from Listing 3, how the introduction of inverse helps. Traditionally, we could add a new constructor Var for terms that consists of a single variable occurrence. However, this would require defining non-capturing substitution, abstraction of a variable name and so on, spoiling the very principle of HOAS. The trick in the paper is similar but generalized: since the result type a is quantified, it's actually not possible to use Inverse to create variable terms; instead it can use only "on the fly" to create local terms in the recursion.
+
+One illustration of the power of the recursion scheme on datatypes with formal inverse is the definition of a function eval that evaluates a formal expression to a value in the meta-language. Even more interesting would be a normalization function on the same lines, in the spirit of "normalization by evaluation" techniques. If the authors could do this, it would had strength to their claims.
+
+Section 4 proves (in the case of the untyped lambda-calculus) that expressions obtained by the operator mu' are contained in those obtained by mu. The viceversa may not be possible. There should be a better clarification of the origin of this problem. At first one may notice that mu' has the same constructors as mu plus the formal inverse, so one would expect the injection to be possible. But since we are in the presence of negative occurrences of the recursive type variable, lambda expressions can be formed on a more restrictive set of functions.
+
+Section 5 shows how to embed Mendler style recursive types into F-omega, first the simple mu* operator, then the operator mu*' with formal inverses. In this second case, the embedding has to be done case by case for each specific data structure. I admit that I could not check the specific details of this part of the paper.
+
+The later section 7 talks about ongoing work on the extension of Mendler-style recursion with sized indices and to parametric iteration. It lacks an initial explanation of these concepts and some motivation. Personally I would prefer this part to be left out (and published when it is fully developed) and instead see more detailed and intuitive explanations of the main part of the article.
+
+In conclusion, I find the article to contain and interesting and elegant new idea that is developed in a technically skillful and effective way. I find that the style can be improved by deeper explanation of the core concepts, but overall I give it a positive assessment.
+
+MINOR COMMENTS AND TYPOS
+
+Section 2:
+
+The last paragraph, explaining Mendler style, is a bit obscure and, in my opinion, would not be understood by someone not already familiar with it. It is not clear what "abstract operations" refers to. It would be better understandable if you say that the constructors of the recursive types are given by the functor f, the recursive type is formalized as a fixed point of f, and iteration is realized by giving a function that performs one step: wanting to define a function of type (mu f -> a) we just say how, if we already have it on an approximation r of (mu f), we can extend it to an extra application of f, that is, from (r->a) we go to (f r -> a).
+They you can extend the explanation to the recursion scheme.
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 3
+TITLE: Mendler-style recursion schemes for mixed-variant datatypes
+AUTHORS: Ki Yung Ahn, Tim Sheard and Marcelo Fiore
+
+
+----------- REVIEW -----------
+This paper discusses the use of Mendler-style iteration for
+mixed-variant datatypes, i.e. for recursive datatypes with
+contravariant recursion. This is a very interesting topic relevant for
+TYPES, with interesting bits of results but the writing should first
+be highly improved. Not only there are a lot of typos and sentences
+with shaky grammar, but, scientifically, the work looks more like a
+work in progress than like a ready-to-publish paper.
+
+Here are some examples of this work-in-progress state.
+
+Section 5.2 on encoding msfits in System F_omega looks like the
+authors are thinking aloud, with missing pieces (In'_*) which suggest
+that the primary encoding (of mu'_*) might after all not be the right one.
+
+On page 11, this is even more confusing that I did not see an explanation of
+why K is useful for the system F_omega encoding. Section 5.4 seems actually
+to end with a negative answer, requiring that going in (eta) and out K (eta-1)
+is the identity, which is not the case.
+

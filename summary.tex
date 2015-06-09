@@ -1,0 +1,93 @@
+\section{Summary and Future Work}
+
+We reviewed Mendler-style iteration (\MIt{}) and
+primitive recursion (\mpr{}) with their typical examples,
+the list length function (Listing~\ref{lst:Len}) and
+the factorial function (Listing~\ref{lst:mprim}), respectively.
+\mpr{} extends \mit{} with the additional cast operation that
+converts abstract recursive values to concrete recursive values.
+Moreover, we reviewed Mendler-style iteration with syntactic
+inverses (\msfit{}) with the HOAS formatting example (Listing~\ref{lst:HOASshow});
+this is the ``hello world'' example of recursion schemes over
+mixed-variant datatypes. The abstract inverse operation provided
+by \msfit{}, which is not present in \MIt{}, makes it useful over
+mixed-variant datatypes.
+
+We formulated the type-preserving evaluator for the simply-typed HOAS
+(Listing~\ref{lst:HOASeval}). This evaluator demonstrates the usefulness
+of \msfit{} over indexed mixed-variant datatypes. Moreover, this
+example is a novel theoretic discovery that type-preserving HOAS
+evaluation can directly (\ie, without translation into intermediate
+data structure such as first-order syntax) embedded into System \Fw\ 
+because we proved termination of the HOAS evaluator by embedding
+\msfit{} into System \Fw\ (\S\ref{sec:theory:embed}). Moreover,
+we studied the equational properties of the embedding
+(\S\ref{sec:theory:embed}-\ref{sec:theory:srpair}) and
+the subtype relation between ordinary fixpoint types for \MIt{} and
+their corresponding inverse-augmented fixpoint types for \msfit{}
+(\S\ref{sec:murec}).
+
+We introduced the idea of Mender-style iteration with a sized index
+(\mprsi{}) motivated by the example of type-preserving evaluation
+via semantic domain (Listing~\ref{lst:HOASevalV}), in contrast to 
+the evaluation example via native values of the host language
+using \msfit{} (Listing~\ref{lst:HOASeval}). \mprsi{} extends \mpr{}
+with the additional abstract uncast operation, which is
+the inverse of the abstract cast operation provided by \mpr{} as well.
+However, the uncast operation needs to be restricted in order to
+guarantee termination. Termination proof for \mprsi{} needs
+further investigation.
+
+We introduced Mendler-style iteration over PHOAS (\mphit{}) and
+demonstrated its usefulness by writing the type-preserving evaluator
+over typed PHOAS (Listing~\ref{lst:PHOASeval}); this is similar to
+the HOAS evaluator using \msfit{} (Listing~\ref{lst:HOASeval}) but
+even more succinct because abstract inverses are not needed.
+Moreover, we can write examples using \mphit{} that are
+not expressible using \msfit{} such as the desugaring of
+higher-order syntax (Listing~\ref{lst:PHOASdesug}). We hope to show
+termination of \mphit{} by finding its embedding in System \Fixw,
+which is an extension of System \Fw\ that can embed \mpr{}.
+
+Mendler-style recursion schemes naturally extends term-indexed datatypes
+(\eg, length-indexed lists) so that one can express more fine-grained
+properties of programs in their types Ahn, Sheard, Fiore, and Pitts
+\cite{AhnSheFioPit13} developed a term-indexed calculi System $\F_i$
+by extending System \Fw\ with term indices in order to embed
+Mendler-style recursion schemes such as \MIt{} and \msfit{} over
+term-indexed datatypes. System $\textsf{Fix}_i$ \cite{Ahn14thesis} is
+a similar extension to System \Fixw\ that can embed \mpr{} and
+(hopefully) \mphit{} over term-indexed datatypes.
+
+Based on the theories of term-indexed calculi, we are designing and
+implementing a language called Nax, named after \emph{Nax P. Mendler},
+that supports Mendler-style recursion schemes over
+both type- and term-indexed datatypes as native language constructs.
+The Nax language \cite{Ahn14thesis} is designed to adopt advantages
+of both functional programming languages (\eg, mixed-variant datatypes,
+type inference) and dependently-typed proof assistants (\eg,
+fine-grained properties, logical consistency). Semantics of Nax can be
+understood by embedding its key constructs such as datatypes and
+recursion schemes into the term-indexed calculi.
+
+One of the challenges in the language design is to choose as many
+useful set of Mendler-style recursion schemes, including ones
+for mixed-variant datatypes, that have compatible embeddings
+in a term-indexed calculus. Not all recursion schemes would necessarily
+have close relationship between their fixpoint types, as the subtyping
+relation between fixpoints of \MIt{} and \msfit{} discussed
+in \S\ref{sec:murec}. \MIt{} and \mpr{} are compatible as well.
+However, we think it may be difficult to find compatible embeddings for
+both \mpr{} and \msfit{}. We hope to discover an embedding of \mphit{}
+that is compatible with the embedding of \mpr{}.
+
+There are several other features in consideration to develop Nax to
+become a more powerful and practical language. Some have already been
+implemented and awaiting theoretical clarifications, while others
+are just preliminary thoughts:
+restrictive form of kind polymorphsim, pattern match coverage checking,
+generalization of arrow (\ie, function) types in abstract operations
+to generalize Mendler-style recursion schemes even further (\eg,
+monadic recursion \cite{bahr11wgp}), and handling computations that
+cannot (or need not) be internally proved terminating by the type system
+(\eg, bar types \cite{constable1987partial}, mobile types \cite{CasSjoWei14}).

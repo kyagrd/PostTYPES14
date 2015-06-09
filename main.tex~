@@ -1,0 +1,288 @@
+%This is a template for producing LIPIcs articles.
+%See lipics-manual.pdf for further information.
+
+\documentclass[a4paper,UKenglish]{lipics}
+  %for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+  %for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+ % for section-numbered lemmas etc., use "numberwithinsect"
+ 
+\usepackage{microtype}%if unwanted, comment out or use option "draft"
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plain}% the recommended bibstyle
+
+% Author macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Mendler-style Recursion Schemes for Mixed-Variant Datatypes
+%%\footnote{This work was partially supported by TODO list grant etc.}
+	}
+%% \titlerunning{A Sample LIPIcs Article} %optional, in case that the title is too long; the running title should fit into the top page column
+
+\author[1]{Ki Yung Ahn}
+\author[1]{Tim Sheard}
+\author[2]{Marcelo Fiore}
+\affil[1]{Department of Computer Science, Portland State University\\
+  Oregon, USA\\
+  \texttt{\{kya,sheard\}@cs.pdx.edu}}
+\affil[2]{Computer Laboratory, University of Cambridge\\
+  Cambridge, UK\\
+  \texttt{Marcelo.Fiore@cl.cam.ac.uk}}
+\authorrunning{KY. Ahn, T. Sheard and M. Fiore} %mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et. al.'
+
+\Copyright{Ki Yung Ahn, Tim Sheard and Marcelo Fiore}%mandatory. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+\subjclass{
+D.3.3 [Programming Languages]: Language Constructs and Features
+--- Data types and structures, Polymorphism, and Recursion;
+F.3.3 [Logics and Meanings of Programs]: Studies of Program Constructs
+-- Functional constructs, Program and recursion schemes, and Type structure;
+F.4.1 [Mathematical Logic and Formal Systems]: Mathematical Logic
+--- Lambda calculus and related systems
+}
+\keywords{
+Mendler-style recursion, higher-order abstract syntax, HOAS,
+mixed-variant datatypes, negative datatypes, termination, normalization}
+% mandatory: Please provide 1-5 keywords
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Editor-only macros (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\serieslogo{}%please provide filename (without suffix)
+\volumeinfo%(easychair interface)
+  {Billy Editor, Bill Editors}% editors
+  {2}% number of editors: 1, 2, ....
+  {Conference title on which this volume is based on}% event
+  {1}% volume
+  {1}% issue
+  {1}% starting page number
+\EventShortName{}
+\DOI{10.4230/LIPIcs.xxx.yyy.p}% to be completed by the volume editor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\cf}[0]{{cf.}}
+\newcommand{\eg}[0]{{e.g.}}
+\newcommand{\ie}[0]{{i.e.}}
+\newcommand{\aka}[0]{{a.k.a.}}
+
+\newcommand{\F}[0]{{\ensuremath{\mathsf{\uppercase{F}}}}}
+\newcommand{\Fw}[0]{{\ensuremath{\mathsf{\uppercase{F}}_{\!\omega}}}}
+\newcommand{\Fixw}[0]{{\ensuremath{\mathsf{\uppercase{F}\lowercase{ix}}_{\omega}}}}
+\newcommand{\Fwhat}[0]{{\ensuremath{\mathsf{\uppercase{F}}_{\!\omega}\!\!\char`\^}}}
+
+\newcommand{\MIt}[1]{\ensuremath{\textbf{\textit{mit}}_{#1}}}
+\newcommand{\MPr}[1]{\ensuremath{\textbf{\textit{mpr}}_{#1}}}
+\newcommand{\mpr}[1]{\ensuremath{\textbf{\textit{mpr}}_{#1}}}
+\newcommand{\MsfIt}[1]{\ensuremath{\textbf{\textit{msfit}}_{#1}}}
+\newcommand{\msfit}[1]{\ensuremath{\textbf{\textit{msfit}}_{#1}}}
+\newcommand{\mprsi}[1]{\ensuremath{\textbf{\textit{mprsi}}_{#1}}}
+\newcommand{\mphit}[1]{\ensuremath{\textbf{\textit{mphit}}_{#1}}}
+\newcommand{\lift}[0]{\textit{lift}}
+\newcommand{\In}[1]{\ensuremath{\textbf{\textit{In}}_{#1}}}
+\newcommand{\hatIn}[1]{\ensuremath{\textbf{\textit{I\^n}}_{#1}}}
+\newcommand{\inL}[0]{\textit{in}_{L}}
+\newcommand{\inR}[0]{\textit{in}_{R}}
+
+\newcommand{\textcomment}[1]{\rm\color{blue}#1}
+
+%% \setlength{\thickmuskip}{0mu}
+%% \setlength{\medmuskip}{0mu}
+%% \setlength{\thinmuskip}{0mu}
+\lstset{captionpos=t,
+	float,
+	keepspaces=false,
+	abovecaptionskip=-\medskipamount,
+	language=Haskell,
+ 	basicstyle=\it,
+ 	keywordstyle=\rm\bfseries,
+	commentstyle=\color{blue},
+	escapechar={\%},
+	stringstyle=\rm\ttfamily,
+	deletekeywords={Bool,Int,Integer,String,show,const,id,length,List},
+ 	literate=
+ 		{forall}{{$\forall$}}1
+ 		{:}{{$:$}}1
+ 		{;}{{$;$}}1
+ 		{::}{{$::$}}1
+ 		{->}{{$\to$}}2
+ 		{=}{{$=$}}1
+ 		{=>}{{$\Rightarrow$}}2
+ 		{*}{{$*$}}1
+ 		{\\}{{$\lambda$}}1
+ 		{eta}{{$\eta$}}1
+		{Phi0}{{Phi$_{*}$}}3
+		{Phi1}{{Phi$_{*\to*}$}}5
+		{Phi0'}{{Phi$_{*}^{\phantom{.}\prime}$}}3
+		{Phi1'}{{Phi$_{*\to*}^{\phantom{.}\prime}$}}5
+		{Mu_0}{{$\hat\mu_{*}$}}1
+		{Mu0}{{$\mu_{*}$}}1
+		{In_0}{{\hatIn{*}}}2
+		{In0}{{\In{*}}}2
+		{out0}{{out$_{*}$}}3
+		{Mu_1}{{$\hat\mu_{*\to*}$}}3
+		{Mu1}{{$\mu_{*\to*}$}}3
+		{In_1}{{\hatIn{*\to*}}}4
+		{In1}{{\In{*\to*}}}4
+		{out1}{{out$_{*\to*}$}}5
+		{Rec0}{{$\mu_{*}^\prime$}}1
+		{Roll0}{{$\In{*}^\prime$}}2
+		{unRoll0}{{unIn$_{*}^\prime$}}4
+		{Var_0}{{Var$_{*}$}}3
+		{Inverse0}{{Inverse$_{*}$}}6
+		{Rec1}{{$\mu_{*\to*}^\prime$}}3
+		{Roll1}{{$\In{*\to*}^\prime$}}4
+		{unRoll1}{{unIn$_{*\to*}^\prime$}}6
+		{Var_1}{{Var$_{*\to*}$}}5
+		{Inverse1}{{Inverse$_{*\to*}$}}8
+		{mphit}{{$\mphit{}$}}5
+		{mphit0}{{$\mphit{*}$}}6
+		{mphit1}{{$\mphit{*\to*}$}}8
+		{var}{{\textit{var}}}2
+ 		{phi}{{$\varphi$}}1
+		{r_}{{$r_{\!\frac{\;\,}{\,\;}}$}}2
+		{id}{{\textit{id}}}2
+ 		{t1}{{$t_1$}}1
+ 		{t1}{{$t_1$}}1
+ 		{t2}{{$t_2$}}1
+ 		{e1}{{$e_1$}}1
+ 		{e2}{{$e_2$}}1
+		{pr}{{pr}}2
+		{times}{{times}}4
+		{mpr}{{mpr}}3
+		{mpr1}{{mpr$_{* \to *}$}}6
+		{mprim}{{\mpr{}}}3
+		{mprim0}{{\mpr{*}}}4
+		{mprim1}{{\mpr{* \to *}}}6
+		{mprsi}{{\mprsi{}}}5
+		{mprsi1}{{\mprsi{* \to *}}}7
+		{uncast}{{uncast}}6
+		{cast}{{cast}}3
+		{call}{{call}}3
+		{fac}{{fac}}2
+		{zero}{{zero}}3
+		{succ}{{succ}}3
+		{pred}{{pred}}3
+		{factorial}{{factorial}}6
+		{unVal}{{un\!Val}}4
+		{mcata}{{\MIt{}}}3
+		{mcata0}{{\MIt{*}}}3
+		{mcata1}{{\MIt{* \to *}}}5
+		{msfcata}{{\msfit{}}}4
+		{msfcata'}{{\msfit{}$^\prime$}}5
+		{msfcata0}{{\msfit{*}}}5
+		{msfcata1}{{\msfit{* \to *}}}7
+ 		{+}{{$+$}}1
+		{++}{{$+\!\!\!+$}}2
+ 		{(}{{$($}}1
+ 		{)}{{$)$}}1
+ 		{[}{{$[$}}1
+ 		{]}{{$]$}}1
+ 		{\{}{{$\{$}}1
+ 		{\}}{{$\}$}}1
+ 		{|}{{$\mid$}}1
+		{Exp}{{Exp}}3
+		{Expr}{{Expr}}4
+		{Exp_u}{{Exp$_u$}}3
+		{ExpF}{{ExpF}}4
+		{ExprF}{{ExprF}}5
+		{ExpF_u}{{ExpF$_u$}}4
+		{App_u}{{App$_u$}}4
+		{Lam_u}{{Lam$_u$}}4
+		{V_u}{{V\!$_u$}}1
+		{Val}{{Val}}3
+		{VFun_u}{{VFun$_u$}}4
+		{Expr'}{{Expr$\,^\prime$}}5
+		{Exp'}{{Exp$\,^\prime$}}4
+		{show'}{{show$\,^\prime$}}4
+		{desug}{{desug}}4
+		{desugExp}{{desugExp}}8
+		{showExp}{{showExp}}7
+		{String}{String}5
+		{Bool}{{Bool}}4
+		{List}{{List}}3
+		{Int}{{Int}}3
+		{inv}{{inv}}3
+		{nil}{{nil}}2
+		{len}{{len}}3
+		{length}{{length}}4
+		{cons}{{cons}}3
+		{const}{const}4
+		{ev}{{ev}}2
+		{val}{{val}}2
+		{eval}{{eval}}3
+		{veval}{{veval}}4
+		{vs}{{vs}}2
+		{vars}{{vars}}3
+		{lam}{{lam}}3
+		{`}{{$^\backprime$}}1
+		{app}{{app}}3
+		{`app`}{{$^\backprime\textit{app}^\backprime$}}4
+		{Id}{{K}}1
+		{MkId}{{$\eta$}}2
+		{unId}{{$\eta^{-1}$}}2
+		{exp2expr}{{exp2expr}}7
+		{expr2exp'}{{expr2exp$^\prime$}}7
+		{exp'2expr}{{exp$^\prime$2expr}}7
+		{p2r}{{p2r}}2
+}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Some concepts, such as Higher-Order Abstract Syntax (HOAS),
+are most naturally expressed by \emph{mixed-variant datatypes}
+(\aka\ negative (recursive) datatypes). Unfortunately,
+mixed-variant datatypes are often outlawed in formal reasoning systems
+based on the Curry--Howard correspondence (\eg, Coq, Agda), because
+the conventional recursion schemes (or induction principles) supported in
+such systems cannot guarantee termination for mixed-variant datatypes.
+
+There is an alternative style of formulating recursion schemes,
+known as the Mendler style, that can guarantee termination for
+arbitrary datatypes. Ahn and Sheard \cite{AhnShe11} formulated
+a Mendler-style recursion scheme (\msfit{}), and provided
+examples involving regular (\ie, non-indexed) mixed-variant datatypes
+(\eg, untyped $\lambda$-calculus in HOAS). Their examples demonstrate
+an advantage of the Mendler style -- a termination guarantee for
+arbitrary datatypes, including mixed-variant ones. They proved
+termination of the examples via an embedding into System~\Fw.
+
+Another advantage of the Mendler style is that recursion schemes
+naturally extend to non-regular (\ie, indexed) datatypes. In this paper,
+we provide another example, a type-preserving evaluator for a simply-typed HOAS,
+defined as a type-indexed mixed-variant datatype. This example demonstrates
+both advantages of the Mendler style.
+
+This example illustrate a novel discovery -- that the simply-typed HOAS evaluator
+is expressible within System~\Fw. To our knowledge, this is the first example of
+a simply-typed HOAS evaluator (without translation through first-order syntax)
+that is equipped with correct-by-construction proofs
+(in the Curry--Howard sense) of both type-preservation and normalization.
+We also develop further theoretical discussions on the \Fw-embedding of \msfit{}
+and introduce ongoing studies on two new recursion schemes
+(\mprsi{} and \mphit{}), which are also useful for mixed-variant datatypes.
+We hope our work motivates future design of
+logical reasoning systems that support a wider range of datatypes,
+including mixed-variant ones.
+\end{abstract}
+
+\input{intro}
+\input{mendler}
+\input{eval}
+\input{murec}
+\input{theory}
+\input{related}
+\input{ongoing}
+\input{summary}
+
+\section*{Acknowledgements}
+%% \subparagraph*{Acknowledgements}
+Thanks to Gabor Greif, Keewon Seo, TODO, TODO, and TODO for their comments.
+
+%% \appendix
+%% \section{TODO Appendix Section}
+
+\bibliography{main}
+
+\end{document}

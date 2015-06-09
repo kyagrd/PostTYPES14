@@ -1,0 +1,73 @@
+\section{Introduction}\label{sec:intro}
+
+Inspired by Mendler \cite{Mendler87}, Uustalu, Matthes, and others
+\cite{UusVen99,UusVen00,AbeMatUus03,AbeMatUus05,AbeMat04} have studied
+and generalized Mendler's formulation of primitive recursion. They coined
+the term \emph{Mendler style} for this new way of formulating recursion schemes
+and called the previous prevalent approach \emph{conventional style} (\eg,
+the Squiggol school and structural/lexicographic termination checking
+as used in proof assistants). Advantages of the Mendler style,
+in contrast to the conventional style, include:
+\begin{itemize}
+\item Admitting arbitrary recursive datatype definitions
+	(including mixed-variant ones),
+\item Succinct and intuitive usability of recursion schemes
+	(code looks like general recursion),
+\item Uniformity of recursion scheme definition across all datatypes
+	(including indexed ones),
+\item Type-based termination
+	(not relying on any external theories other than type checking).
+\end{itemize}
+Primary focus of this work is on the first advantage, but other advantages
+are discussed and demonstrated by examples throughout this paper.
+
+Early work \cite{UusVen99,UusVen00,AbeMatUus03,AbeMatUus05,AbeMat04} on
+the Mendler style noticed the first advantage but focused on examples
+using positive datatypes. Recently, Ahn and Sheard \cite{AhnShe11}
+discovered a Mendler-style recursion scheme \msfit{} over mixed-variant datatypes
+(inspired by earlier work \cite{MeiHut95,FegShe96,bgb} in the conventional setting).
+Using \msfit{}, they demonstrated a HOAS formatting example (\S\ref{sec:mendler:sf}) over
+a non-indexed HOAS. This example was adopted from earlier work \cite{FegShe96,bgb} in
+the conventional style. In this paper we demonstrate that \msfit{} is useful over
+indexed datatypes as well (\S\ref{sec:HOASeval}).
+
+Ahn and Sheard \cite{AhnShe11} gave a semi-formal termination proof by
+embedding \msfit{} into subset of Haskell that is believed to be a subset of System~\Fw.
+Here, we investigate its properties in a more rigorous theoretical
+setting (\S\ref{sec:theory}).
+
+In this paper, we give an introduction to the Mendler style by reviewing
+Mender-style iteration (\MIt{}) and iteration with syntactic inverses (\msfit{})
+over regular (\ie, non-indexed) datatypes. Next, we demonstrate the usefulness of
+the Mendler-style recursion scheme \msfit{} over
+indexed and mixed-variant datatypes (\S\ref{sec:HOASeval}).
+We report our novel discovery that
+a type-preserving evaluator for a simply-typed HOAS can be defined
+using \lstinline{msfcata}; this indicates that a simply-typed HOAS evaluator
+can be embedded in System~\Fw\ with its correct-by-construction proof of
+type-preservation and strong normalization. We do just that -- embedding \msfit{}
+into System \Fw\ (\S\ref{sec:theory:embed}). We also show that
+the equational properties of \msfit{} are faithfully transferred to its
+\Fw-embedding (\S\ref{sec:theory:eqlam}, \S\ref{sec:theory:eqapp}).
+Moreover, we discuss the relationship between ordinary fixpoints and
+the inverse-augmented fixpoints used in \msfit{} (\S\ref{sec:ongoing}),
+and introduce two new recursion schemes over mixed-variant datatypes
+(\S\ref{sec:ongoing}).
+
+Our contributions can be listed as follows:
+\begin{enumerate}
+\item Demonstrating the usefulness of the Mendler style
+	over indexed and mixed-variant datatypes,
+\item Writing a simply-typed HOAS evaluator using \msfit{},
+	whose type-preservation and termination properties are guaranteed
+	simply by type checking (\S\ref{sec:HOASeval}),
+\item Clarifying the relation between
+	fixpoints of \MIt{} and fixpoints of \msfit{} (\S\ref{sec:murec}),
+\item Embedding \msfit{} into System \Fw\ (\S\ref{sec:theory:embed}),
+\item Proving equational properties regarding the \Fw-embedding of \msfit{} 
+	(\S\ref{sec:theory:eqlam}, \S\ref{sec:theory:eqapp}),
+\item Formulating the Mendler-style primitive recursion with a size-index %%% sized index
+	(\S\ref{sec:ongoing:mprsi}), and
+\item Formulating another Mendler-style iteration with syntactic inverses
+	\textit{\`a la} PHOAS (\S\ref{sec:ongoing:mphit}).
+\end{enumerate}

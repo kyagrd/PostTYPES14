@@ -1,0 +1,234 @@
+\section{Related Work}\label{sec:relwork}
+Here, we discuss several related work. First, we introduce Mendler-style
+primitive recursion (\mpr{}) in \S\ref{sec:relwork:mpr} to lead up
+the discussion of \mprsi{} (\S\ref{sec:ongoing:mprsi}). Next, we summarize
+type-based termination and sized-type approach (in relation to \mpr{})
+in \S\ref{sec:relwork:sized}. Lastly, we discuss a generic programming
+library in Haskell that supports binders using parametric HOAS
+in \S\ref{sec:relwork:PCDT}, which leads up the discussion of
+\mphit{} (\S\ref{sec:ongoing:mphit}).
+
+\subsection{Mendler-style primitive recursion}\label{sec:relwork:mpr}
+\begin{figure}
+\lstinputlisting[
+	caption={Examples using Mendler-style primitive recursion
+		\mpr{} at kind $*$\,: a constant time \lstinline{pred} and
+		a \lstinline{factorial} function. \label{lst:mprim}},
+        firstline=12]{Fac.hs}
+\vspace*{-3ex}
+\end{figure}
+
+Termination of the Mendler-style iteration (\MIt{}) can be proved by embedding
+\MIt{} into System \Fw\ as discussed in \S\ref{sec:mendler:it}. The embedding
+of \MIt{} in \S\ref{sec:mendler:it} is \emph{reduction preserving}, that is,
+the number of reduction steps using the embedding and using
+the equational specification should differ no more than constant time factor.
+Reduction preserving embedding of primitive recursion into System \Fw\ cannot
+exist because it is known that ``induction is not derivable in second order
+dependent type theory'' \cite{Geuvers01} and that ``primitive recursion
+can be seen as the computational interpretation of induction through
+the Curry-Howard interpretation of propositions-as-types'' \cite{Hallnas92}.
+Although it is possible to simulate primitive recursion in terms of iteration,
+it may become computationally inefficient. For example, \lstinline{pred}\,
+in Listing~\ref{lst:mprim} could be defined using \MIt{} but its time complexity
+would be at least linear to the input rather than constant time. Constant time
+\lstinline{pred} is definable due to the abstract cast operation provided by
+\mpr{}. This operation casts an abstract recursive values of type $r$ into
+a concrete recursive values of type \lstinline{Mu0 f}\,; its type
+\lstinline{(r -> Mu0 f)} is apparent from the type signature of
+\lstinline{mprim0}. This cast operation computes in constant time because
+it is implemented as the identity function (\lstinline{id}) in the definition
+of \lstinline{mprim0}. A representative example of \mpr{} that actually use
+recursion is a factorial function. The multiplication function \lstinline{times}
+used in the definition of \lstinline{factorial} can be defined in terms of
+\MIt{*} and an addition function, in turn, the addition function can be defined
+in terms of \MIt{*} as well. Mendler-style primitive recursion generalize to
+higher kinds in the same manner as \MIt{} and \msfit{}
+(see Listing~\ref{lst:reccomb} in \S\ref{sec:mendler}).
+
+Abel and Matthes \cite{AbeMat04} discovered a reduction preserving
+embedding of the Mendler-style primitive recursion in System \Fixw,
+which is a strongly normalizing calculus extended from System \Fw\ with
+polarized kinds and equi-recursive fixpoints. Polarized kinds extend
+the kind arrow with polarities in the form of $p\kappa_1 \to \kappa_2$
+where polarity $p$ is either $+$, $-$, or $0$; meaning that the argument
+must be used in positive, negative, or any position, respectively.
+For example, in a polarized system, base structure \lstinline{N :: * -> *} 
+for natural numbers in Listing~\ref{lst:mprim} could be assigned $+*\to*$
+because its argument $r$ is only used covariantly, and, base structure
+\lstinline{ExpF  :: * -> *} in Listing~\ref{lst:HOASshow} for the untyped HOAS
+(see \S\ref{sec:mendler:sf}) must be assigned kind $0* \to *$ because
+its argument $r$ is used in both covariant and contravariant positions.
+The equi-recursive fixpoint $\textsf{fix}_\kappa : +\kappa \to \kappa$
+in System~\Fixw\ can be applied only to positive base structures.\footnote{
+	Otherwise, equi-recursive types are able to express
+	diverging computation when they are not restricted to positive polarity}
+Abel and Matthes encoded iso-recursive fixpoint operator $\mu$ in terms of
+equi-recursive fixpoint operator \textsf{fix} by converting base structures of
+arbitrary polarities into base structures of positive polarities, in order
+to embed \mpr{} into System \Fixw.
+
+\subsection{Type-based termination and sized types}\label{sec:relwork:sized}
+\emph{Type-based termination} (coined by Barthe and others \cite{BartheFGPU04})
+stands for approaches that integrate termination into type checking,
+as opposed to syntactic approaches that reason about termination over
+untyped term structures. The Mendler-style approach is, of course,
+type-based. In fact, the idea of type-based termination was inspired by
+Mendler \cite{Mendler87,Mendler91}. In the Mendler style, we know that
+well-typed functions defined using Mendler-style recursion schemes always
+terminate. This guarantee follows from the design of the recursion scheme,
+where the use of higher-rank polymorphic types in the abstract operations
+enforce the invariants necessary for termination.
+
+Abel \cite{abel06phd,Abel12talkFICS} summarizes the advantages of
+type-based termination as:
+\emph{communication} (programmers think using types),
+\emph{certification} (types are machine-checkable certificates),
+\emph{a simple theoretical justification}
+        (no additional complication for termination other than type checking),
+\emph{orthogonality} (only small parts of the language are affected,
+        \eg, principled recursion schemes instead of general recursion),
+\emph{robustness} (type system extensions are less likely to
+                        disrupt termination checking),
+\emph{compositionality}
+        (one needs only types, not the code, for checking the termination), and
+\emph{higher-order functions and higher-kinded datatypes}
+        (works well even for higher-order functions and non-regular datatypes).
+In his dissertation \cite{abel06phd} (Section 4.4) on sized types,
+Abel views the Mendler-style approach as enforcing size restrictions
+using higher-rank polymorphism as follows:
+\begin{itemize}
+\item The abstract recursive type $r$ in the Mendler style corresponds to
+        $\mu^\alpha F$ in his sized-type system (System \Fwhat),
+        where the sized type
+        for the value being passed in corresponds to $\mu^{\alpha+1} F$.
+\item The concrete recursive type $\mu F$ in the Mendler style corresponds to
+        $\mu^\infty F$ since there is no size restriction.
+\item By subtyping, a type with a smaller size-index can be cast to
+        the same type with a larger size-index.
+\end{itemize}
+The same intuition holds for the termination behaviors
+of Mendler-style recursion schemes over positive datatypes.
+For positive datatypes, Mendler-style recursion schemes terminate
+because $r$-values are direct subcomponents of the value being eliminated.
+They are always smaller than the value being passed in.
+Types enforce that recursive calls are only well-typed,
+when applied to smaller subcomponents.
+
+Abel's System \Fwhat\ can express primitive recursion quite naturally
+using subtyping. The casting operation $(r \to \mu F)$ in Mendler-style
+primitive recursion corresponds to an implicit conversion by subtyping
+from $\mu^\alpha F$ to $\mu^\infty F$ because $\alpha \leq \infty$.
+System \Fwhat\ \cite{abel06phd} is closely related to
+System \Fixw\ \cite{AbeMat04}. Both of these systems are base on
+equi-recursive fixpoint types over positive base structures.
+Both of these systems are able to embed (or simulate) Mendler-style
+primitive recursion (which is based on iso-recursive types) via
+the encoding \cite{Geu92} of arbitrary base structures into
+positive base structures.
+
+Abel's sized-type approach evidences good intuition concerning the reasons
+that certain recursion schemes terminate over positive datatypes.
+But, we have not gained a useful intuition of whether or not those
+recursion schemes would terminate for negative datatypes, unless there is
+an encoding that can translate negative datatypes into positive datatypes.
+For primitive recursion, this is possible (as we mentioned above). However,
+for our recursion scheme \MsfIt, which is especially useful over negative
+datatypes, we do not know of an encoding that can map the inverse-augmented
+fixpoints into positive fixpoints. So, it is not clear whether the sized-type
+approach based on positive equi-recursive fixpoints can provide
+a good explanation for the termination of \MsfIt.
+
+In \S\ref{sec:ongoing:mprsi}, we will discuss
+another Mendler-style recursion scheme (\mprsi{}), which is also useful over
+negative datatypes and believed to have a termination property (not yet proved)
+based on the size of the index in the datatype.
+
+
+\subsection{Parametric compositional data types}
+\label{sec:relwork:PCDT}
+Bahr and Hvited developed a generic programming library in Haskell,
+\emph{compositional data types} (CDT) \cite{bahr11wgp}, which builds on
+Wouter Swierstra's ideas of \emph{data types \`a la carte} \cite{WSout08jfp}.
+Recently, they extended CDT to handle binders by adopting Adam Chlipala's
+idea of PHOAS \cite{PHOAS}, naming thier new extension as
+\emph{parametric compositional data types} (PCDT).
+In Section~3 of their paper on PCDT \cite{BahHvi12}, they give an enlightening
+comparative summary on a series of studies on recursion schemes over
+mixed-variant datatypes in the conventional setting ---
+Meijer and Hutton \cite{MeiHut95}, Fegaras and Sheard \cite{FegShe96},
+Washburn and Weirich \cite{bgb}, and their own.
+
+PCDT is based on conventional style, relying on ad-hoc polymorphism.
+That is, they need to derive a class instance of an appropriate algebra
+in order to define a desired recursion scheme for each datatype definition.
+For example, a functor instance for iteration and a difucntor (or profunctor)
+instance for iteration with inverses over regular datatypes.
+Since conventional-style recursion schemes do not generalize naturally
+to non-regular datatypes such as GADTs, they also need to derive different
+class instances, that is, higher-order functor and difunctor instances for
+non-regular datatypes. To alleviate this drawback of conventional style,
+they automate instance derivation by meta-programming using Template Haskell
+for the PCDT library user.
+
+On the contrary, the Mendler style, being based on higher-order
+parametric polymorphism, enjoys uniform definitions of recursion schemes
+across arbitrary kinds of datatypes, naturally generalizing from regular
+to non-regular datatypes. In \S\ref{sec:ongoing:mphit}, we demonstrate
+this elegance of the Mendler style by formulating a Mendler-style counterpart of
+the conventional-style recursion scheme in PHOAS. Here, we summarize
+the key idea how Bahr and Hvited \cite{BahHvi12} factored out
+the fixpoint operator from recursive formulations of PHOAS,\footnote{
+	An online posting of Edward Kmett \cite{PHOASforFree}
+	also discusses PHOAS in a formulation very similar to PCDT.}
+in order to lead up the discussion in \S\ref{sec:ongoing:mphit}.
+
+In PCDT, they transfer the essence of PHOAS using two-level types
+that are equipped with an extra parameter in base functors as well as
+in the fixpoint operator. For example, their fixpoint operator and
+the base functor for the untyped HOAS would be defined as:\footnote{
+	Bahr and Hvited named their fixpoint operator \textit{Trm} in PCDT.
+	Here, we call it $\hat\mu$ in order to use a notation similar to
+	the other operators ($\mu$ and $\breve\mu$) in this paper.
+	In addition, they compose base functors with multiple constructors
+	such as \textit{ExpF} from several single constructor functors;
+	hence, their library is named \emph{compositional}. Here, we focus
+	the discussions on the \emph{parametric} flavor of their contribution.}
+\begin{lstlisting}
+data Mu_0 (f :: * -> * -> *) a = In_0 (f a (Mu_0 f a)) | Var_0 a
+data ExpF r_ r = Lam (r_ -> r) | App r r
+\end{lstlisting}
+Their fixpoint operator \lstinline{Mu_0} takes a type constructor of kind
+\lstinline{* -> * -> *} as an argument, unlike the previously discussed
+fixpoint operators (\eg, \lstinline{Mu0} or \lstinline{Rec0}) that take
+arguments of kind \lstinline{* -> *}. Note the use of two parameters
+\lstinline{r_} and \lstinline{r} used in contravariant and covariant positions
+respectively in the definition of \lstinline{ExpF}; the additional
+parameter \lstinline{r_} is used in a contravariant recursive position
+in the argument of the \lstinline{Lam} constructor.
+
+Then, the recursive type for the untyped HOAS is defined as
+the fixpoint of base \lstinline{ExpF}:
+\begin{lstlisting}
+type Exp' a = Mu_0 ExpF a   -- %\textcomment{pre-expressions that may contain $\textit{Var}_{*}$%}
+type Exp = forall a. Exp' a   -- %\textcomment{\!$\textit{Var}_{*}$-free expressions enforced by parametricty%}
+\end{lstlisting}
+When \lstinline{ExpF}
+is applied to \lstinline{Mu_0}, parameter \lstinline{r_} matches with
+the answer type \lstinline{a}) and parameter \lstinline{r} matches with
+the recursive type \lstinline{(Mu_0  ExpF  a)}.
+Their \lstinline{Var_0} constructor of \lstinline{Mu_0} serves
+the same purpose (\ie, injecting an inverse of an answer value)
+as our \lstinline{Inverse0} constructor of \lstinline{Rec0}.
+
+Finally, the constructor functions for the untyped HOAS are defined as follows:
+\begin{lstlisting}
+lam f = In_0 (Lam (f . Var_0)) -- :: (Mu_0 f a -> Mu_0 ExpF a) -> Mu_0 ExpF a
+app e1 e2 = In_0 (App e1 e2)     -- :: Mu_0 ExpF a -> Mu_0 ExpF a -> Mu_0 ExpF a
+\end{lstlisting}
+Note the similarities between the types of the constructor functions above
+and the types of the constructor functions in Listing~\ref{lst:HOASshow}.
+A notable difference is where the inverse injection is used:
+their \lstinline{Var_0} is used in the constructor function implementation
+(\lstinline{lam}), while our \lstinline{Inverse0} is used in
+the recursion scheme implementation (\msfit{*}).

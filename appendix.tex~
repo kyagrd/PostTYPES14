@@ -1,0 +1,104 @@
+% \vspace*{-1.5ex}
+\begin{lstlisting}[
+	caption={An embedding algorithm in Haskell
+		% for the constructors of
+		% regular datatypes used with \lstinline{msfcata0}
+		% transcribed in Haskell.
+		\label{lst:embed}}]
+data Sig = P | M -- %\textcomment{$P$ and $M$ stands for $+$ and $-$ %}
+
+data Ty = TV Var | All Var Ty | Ty :-> Ty
+        | Unit | Ty :*: Ty -- %\textcomment{These can be encoded too but%}
+        | Void | Ty :+: Ty -- %\textcomment{for convenience of presentation.%}
+        
+data Tm = Fn (Tm -> Tm) | Tm :$ Tm -- %\textcomment{term representation using HOAS%}
+        | Cunit | Tm :* Tm | Fst Tm | Snd Tm
+        | L Tm | R Tm | CaseLR Tm (Tm -> Tm) (Tm -> Tm)
+	| Lift Tm Tm | Phi -- %\textcomment{Added constants for%} lift %\textcomment{and%} phi.
+
+type Var = Int -- %\textcomment{Give some suitable type for variable.%}
+
+flipSig :: Sig -> Sig
+flipSig M = P
+flipSig P = M
+
+-- %\textcomment{For a base structure $F$ defined as ~ \textbf{data}%} F r = C t1 ... tn | ... ,
+-- %\textcomment{the embedding of the constructors of %} Rec0 F %\textcomment{ has the form of %}
+-- %\textcomment{$c = \inR\;(\lambda \varphi.\varphi~\eta^{-1}~(C\;(\textit{rEm}\;t_1)\;\cdots\;(\textit{rEm}\;t_n)))))$ where \textit{rEm} is defined as below:%}
+rEm :: Sig -> Var -> Ty -> Tm -> Tm
+rEm _ _ Unit      = id -- %\textcomment{or %} const Cunit
+rEm _ _ Void      = id
+rEm _ r (TV x) | r/=x = id -- %\textcomment{Ignore variables other than the recursive one.%}
+rEm P _ (TV _)   = Lift Phi -- %\textcomment{Apply%} lift phi %\textcomment{in positive occurrence%}
+rEm M _ (TV _)   = L       -- %\textcomment{and apply $\inL$ in negative occurrence.%}
+rEm p r (a :-> b) = \f -> Fn (\x -> rEm p r b (f :$ rEm p' r a x))
+                  where p' = flipSig p
+rEm p r (a :*: b) = \x -> rEm p r a x :* rEm p r b x
+rEm p r (a :+: b) = \x -> CaseLR x (rEm p r a) (rEm p r b)
+rEm p r (All x b) | r/=x = rEm p r b
+rEm _ _ (All _ _) = error "should have been alpha renamed"
+\end{lstlisting}
+
+\newpage
+\appendix
+\section{Appendix:
+	a type-directed embedding algorithm for the constructors of
+	regular datatypes used with \lstinline{msfcata0}} \label{sec:appendix}
+
+In \S\ref{sec:theory:embed}, we embedded the type constructors of
+the untyped HOAS, which is a mixed-variant datatype with both positive
+and negative occurrences, as annotated by $+$ and $-$
+in $\textit{App}~r^{+}~r^{+}$ and $\textit{Abs}\;(r^{-} \to r^{+})$.
+The HOAS example discussed in \S\ref{sec:theory:embed} has these
+recursive occurrences either at topmost level, as in $\textit{App}~r^{+}~r^{+}$
+occurring twice positively, or on both sides of the arrow type at topmost level,
+as in $\textit{Abs}\;(r^{-} \to r^{+})$ occurring negatively
+on the left-hand side and positively on the right-hand side.
+Positive and negative occurrences are embedded differently --
+recall that we used \lstinline{lift phi} for positive occurrences and $\inL$ for
+negative occurrences (see p\pageref{align:embed} in \S\ref{sec:theory:embed}).
+
+In general, recursive occurrences may occur more deeply inside
+the type structure. For example, consider \lstinline{Rec0 F} where
+\lstinline{data F r =  C}~$((r^{+} \to r^{-}) \to r^{+})$.
+The leftmost occurrence of $r$ in the definition of $F$ is positive
+because it is on the left hand side of the arrow at negative position
+(negative of negative considered positive). Other type structures such as sums,
+products, and universal quantifications do not have affect on the sign of
+recursive occurrences in its subcomponents. That is, the subcomponents
+maintain the same sign for recursive occurrences as their outermost position.
+
+In Listing~\ref{lst:embed}, we describe an algorithm implementing the idea
+discussed in the previous two paragraphs using Haskell. This algorithm is
+type-directed, that is, it analyzes the given base structure $F$ to derive
+the embeddings for the constructors of \lstinline{Rec0 F}. Here, we only
+consider regular datatypes. By convention, the recursive argument $r$ always
+comes at the last. For instance, the base structure for lists
+\lstinline{data L a r = ...} where we take its fixpoint as \lstinline{Mu0(L a)}
+for the list datatype. Therefore without loss of generality, we assume
+that the base structures are defined as \lstinline{data F r = ...}.
+Since our target calculus is polymorphic, we need variables (\textit{Var})
+and universal quantification (\textit{All}) to represent types (\textit{Ty}).
+We have sums (\lstinline{:+:}) and products (\lstinline{:*:}) and their
+identities \lstinline{Unit} and \lstinline{Void} because base structures are
+defined as sums of products of types. We can inline the embeddings of recursive
+types of the form \lstinline{Rec0 G} occurring in the definition of $F$,
+provided that $G$ is defined prior to $F$, because we already know
+the embedding of \lstinline{Rec0} (see p\pageref{sec:theory:embed} in
+\S\ref{sec:theory:embed}) and $G$ can also be embedded into System \Fw\ as
+sums of products. Therefore, it suffice for the embedding function \textit{rEm}
+in Listing~\ref{lst:embed} to analyze type structures (\textit{Ty})
+in order to generate the embedded terms (\textit{Tm}).
+
+We think it would be possible to prove the equational properties of
+this type-directed embedding using interpolation, as used in the paper
+by Matthes \cite{Matthes01a}. In fact, his paper has been a hint to derive
+our algorithm in Listing~\ref{lst:embed}. Although we have only demonstrated
+the algorithm for regular datatypes, we do not expect difficulties
+in generalizing this algorithm to include non-regular datatypes, except for
+truly nested datatypes
+(e.g., \lstinline{data Bush a = BNil | BCons Bush (Bush a)}).
+Embeddings for truly nested datatypes are going to be trickier than
+the embeddings for the other datatypes because truly nested datatype
+are indexed by their own types.
+

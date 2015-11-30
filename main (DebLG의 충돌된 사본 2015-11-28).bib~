@@ -436,7 +436,7 @@ well.}
   url = {http://doi.acm.org/10.1145/2103656.2103723},
   doi = {10.1145/2103656.2103723},
 
-@inproceedings{SelfInterpFomega,
+@inproceedings{SelfInterpFw,
   author = {Matt Brown and Jens Palsberg},
   title = {Breaking Through the Normalization Barrier: A Self-Interpreter for {F}-omega},
   booktitle = {POPL '16},

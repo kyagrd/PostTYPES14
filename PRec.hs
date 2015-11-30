@@ -1,11 +1,16 @@
-{-# LANGUAGE GADTs, RankNTypes #-}
+{-# LANGUAGE GADTs, RankNTypes, TypeOperators #-}
 module PRec where
-
-data Mu_0 f a     = In_0 (f a (Mu_0 f a))       | Var_0 a
+type a .-> b = forall i. a i -> b i
+data Mu_0   f a   = In_0   (f a (Mu_0   f a))   | Var_0 a
 data Mu_1 f a i = In_1 (f a (Mu_1 f a) i) | Var_1 (a i)
-
-type Phi0   f a = forall r  .(r a -> a)         -> f a (r a)   -> a
-type Phi1 f a = forall r i.(forall i.r a i -> a i) -> f a (r a) i -> a i
+type Phi0   f a = forall r.(r a -> a) -> f a (r a) -> a
+type Phi1 f a = forall r.(r a .-> a) -> f a (r a) .-> a
+-- unIn_0 :: Mu_0 f a -> Maybe (f a (Mu_0 f a))
+unIn_0 (In_0 x) = Just x
+unIn_0 _      = Nothing
+-- unIn_1 :: Mu_1 f a i -> Maybe (f a (Mu_1 f a) i)
+unIn_1 (In_1 x) = Just x
+unIn_1 _        = Nothing
 
 mphit0 :: Phi0 f a -> (forall a. Mu_0 f a) -> a 
 mphit0 phi x = mphit phi x where
@@ -14,6 +19,6 @@ mphit0 phi x = mphit phi x where
 
 mphit1 :: Phi1 f a -> (forall a. Mu_1 f a i) -> a i
 mphit1 phi x = mphit phi x where
-  mphit :: Phi1 f a -> Mu_1 f a i -> a i
+  mphit :: Phi1 f a -> Mu_1 f a .-> a
   mphit phi (In_1 x)  = phi (mphit phi) x
   mphit phi (Var_1 a) = a

@@ -1,7 +1,7 @@
-\section{Further work}
-% \section{Ongoing work}
+% \section{Further work}
+\section{Ongoing work}
 \label{sec:ongoing}
-We present two threads of further work regarding
+We present two threads of ongoing work regarding
 Mendler-style recursion schemes over mixed-variant datatypes ---
 Mendler-style primitive recursion with a sized index (\S\ref{sec:ongoing:mprsi})
 and
@@ -88,7 +88,7 @@ We attempt to define \lstinline{unVal} using \lstinline{mprim1} as follows:
 unVal :: Mu1 V (t1 -> t2) -> (Mu1 V t1 -> Mu1 V t2)
 unVal = mprim1 phi where
   phi cast call (VFun f) = ...
-\end{lstlisting}\vspace*{-1ex}
+\end{lstlisting}\vspace*{-1.3ex}
 Inside the \lstinline{phi} function, we have a function
 \lstinline{f :: (r t1 -> r t2)} over abstract recursive values.
 We need to cast \lstinline{f} into a function over concrete recursive values
@@ -119,7 +119,7 @@ mprsi1 :: (forall r i. (forall i. r i -> Mu1 f i)  -- cast
                -> (forall i. r i -> a i)      -- call
                -> (f r i -> a i)        ) -> Mu1 f i -> a i
 mprsi1 phi (In1 x) = phi id id (mprsi1 phi) x
-\end{lstlisting}\vspace*{-1ex}
+\end{lstlisting}\vspace*{-1.2ex}
 Although the type signature above is type-correct, it is too powerful.
 The Mendler-style uses types to forbid non-terminating computations
 as ill-typed. Having both \lstinline{cast} and \lstinline{uncast} supports
@@ -164,7 +164,7 @@ only be applied to the abstract values whose indices are smaller in size
 compared to the size of the argument index. For the \lstinline{veval} example,
 the structural ordering over types can be given as
 \lstinline{t1 < (t1 -> t2)} and \lstinline{t2 < (t2 -> t1)}.
-We have two candidates for the type signature of \lstinline{mprsi1}:\vspace*{.5ex}
+We have two candidates for the type signature of \lstinline{mprsi1}:
 \begin{itemize}
 \item Candidate 1: restrict uses of both \lstinline{cast} and \lstinline{uncast}
 \begin{lstlisting}
@@ -195,14 +195,12 @@ seems to be relevant to showing termination of \lstinline{mprsi}.
 However, existing theories on sized-types are not directly applicable to
 \lstinline{mprsi} because they are focused on positive datatypes, but
 not negative datatypes.
-
-\vspace*{1.2ex}
+\newpage
 \lstinputlisting[
 	caption={Mendler-style parametric iteration
 		(\mphit{}) at kind $*$ and $*\to*$.
 		\label{lst:PRec}},
 	firstline=4]{PRec.hs}
-\vspace*{-1.2ex}
 %% \lstinputlisting[
 %% 	caption={The \lstinline{showExp} example revisited using \mphit{*}.
 %% 		\label{lst:PHOASshow}},
@@ -211,7 +209,6 @@ not negative datatypes.
 	caption={The \lstinline{eval} example revisited using \mphit{*\to*}.
 		\label{lst:PHOASeval}},
 	firstline=4]{PHOASeval.hs}
-\vspace*{-2.8ex}
 
 \subsection{Mendler-style parametric iteration}
 \label{sec:ongoing:mphit}
@@ -244,42 +241,38 @@ the constructor functions of $\hat\mu$-types, which involve
 contravariant recursive occurrences; for instance, \lstinline{lam}
 in Listing~\ref{lst:PHOASeval} is defined in terms of \lstinline{Var_1},
 which is the constructor of \lstinline{Mu_1} for injecting inverses.
-\vspace*{1ex}
-\lstinputlisting[
-	caption={Constant folding using \mphit{*}. \label{lst:PHOAScfold}},
-	firstline=219, lastline=233]{Rec2.hs}
-\vspace*{-1ex}
 
 Bahr and Hvited \cite{BahHvi12} exemplified the strength of their PHOAS-based
 iteration, compared to those \cite{FegShe96,bgb,AhnShe11} based on ordinary
 (or strong) HOAS, by defining a constant folding over a small language.
 In Listing~\ref{lst:PHOAScfold}, we illustrate the constant folding example
-in the Mendler style. Note the simplicity of our Mendler-style version
---- no need for class instances for functor,
-difunctor, or higher-kinded versions of such algebras.
-One can freely use \lstinline{unIn_0} with \lstinline{mphit0}
-assuming that the recursive type \lstinline{Mu_0 f} is constructed
-following the convention that the first and second arguments of
-the base structure \lstinline{f :: * -> * -> *} are contravariant and covariant.
-For instance, \lstinline{r_} is contravariant and \lstinline{r} is covariant
-in the definition of \lstinline{ExpF}.
-Because \lstinline{Mu_0} is defined to be recursive only over the second
-covariant argument, the type system prevents \lstinline{unIn_0} from being
-applied to the first contravariant argument, assuming that the first argument
-type is different from the second arguments.  Within the context of
-\lstinline{phi :: (forall r. (r a->a) -> f a (r a) -> a)},
-the first and second arguments of \lstinline{f} cannot be the same type
-because \lstinline{a} is clearly not unifiable with \lstinline{(r a)}.
+in the Mendler style. Note the simplicity of our Mendler-style version of
+constant folding --- no need for class instances for functor,
+difunctor, or higher-order versions of such algebras (if one wants a
+type-indexed version).
+%%% TODO TODO TODO
+\textcolor{red}{TODO give an intuitive argument
+	why the use of unIn is safe here}
+
+\begin{figure}
+\lstinputlisting[
+	caption={Constant folding using \mphit{*}. \label{lst:PHOAScfold}},
+	firstline=219, lastline=233]{Rec2.hs}
+\end{figure}
 
 Although we transcribed \mphit{} in Haskell, we have not yet proved
 its termination property (neither did Bahr and Hvited \cite{BahHvi12}
 for their conventional version). To prove its termination, we should find
 an embedding of \mphit{} in a strongly normalizing calculus and study
 the equational properties of that embedding, just as we did for \msfit{}
-in \S\ref{sec:theory}. We think \Fixw\ and \Fwhat\ are good candidate calculi
-for embedding \mphit{} because they support polarized kinds.
-With polarized kinds, we can ensure that parameters \lstinline{r} and
-\lstinline{r_} are always used in covariant and contravariant positions,
-respectively, in base functor definitions. Studying the relation between
-$\mu$ and $\hat\mu$, as we did for $\mu$ and $\mu'$ in \S\ref{sec:murec},
-is another subject of future work.
+in \S\ref{sec:theory}. We think System \Fixw\ is a good candidate calculus
+for trying to embed \mphit{} because we can use polarized kinds to ensure
+that parameters \lstinline{r} and \lstinline{r_} are always used covariant
+and contravariant positions, respectively, in base functor definitions.
+Studying the relation between $\mu$ and $\hat\mu$, as we did for
+$\mu$ and $\mu'$ in \S\ref{sec:murec}, is another subject of future work.
+%%%%
+\textcolor{red}{TODO mention polarized kinds whie discussing this
+(has it been introduced before in the related work?)}
+\textcolor{red}{TODO also discuss Abel's $\hat{F}_\omega$ or
+	something for sized types ???}

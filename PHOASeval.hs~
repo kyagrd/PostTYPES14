@@ -3,6 +3,7 @@ import PRec
 
 data ExpF r_ r t where Lam :: (r_ t1 -> r t2) -> ExpF r_ r (t1->t2)
                        App :: r (t1->t2) -> r t1 -> ExpF r_ r t2
+
 type Exp' a t = Mu_1 ExpF a t
 type Exp t = forall a. Exp' a t
 -- lam :: (Mu_1 f a t1 -> Mu_1 ExpF a t2) -> Mu_1 ExpF a (t1 -> t2)

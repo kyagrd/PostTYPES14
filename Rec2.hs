@@ -6,32 +6,27 @@ import Control.Monad
 
 type a .-> b = forall i. a i -> b i
 
-data Mu_0 f    = In_0 (f (Mu_0 f) (Mu_0 f))
-data Mu_1 f i  = In_1 (f (Mu_1 f) (Mu_1 f) i)
--- primitive recursion
-                           {- cast -}         {- call -}
-type Phi_0 f a = forall r. (r  -> Mu_0 f)  -> (r  -> a)  -> f r r  -> a
-type Phi_1 f a = forall r. (r .-> Mu_1 f)  -> (r .-> a)  -> f r r .-> a
+data Mu0   f    = In0   (f (Mu0   f) (Mu0   f))
+data Mu1 f i  = In1 (f (Mu1 f) (Mu1 f) i)
+-- %\textcomment{primitive recursion%}        cast            call
+type Phi0   f a = forall r. (r -> Mu0   f) -> (r -> a) -> f r r -> a
+type Phi1 f a = forall r. (r .-> Mu1 f) -> (r .-> a) -> f r r .-> a
 
-mpr0 :: Phi_0 f a -> Mu_0 f  -> a
-mpr0 phi (In_0 x) = phi id (mpr0 phi) x
+mpr0 :: Phi0 f a -> Mu0 f  -> a
+mpr0 phi (In0 x) = phi id (mpr0 phi) x
 
-mpr1 :: Phi_1 f a -> Mu_1 f .-> a
-mpr1 phi (In_1 x) = phi id (mpr1 phi) x
-
+mpr1 :: Phi1 f a -> Mu1 f .-> a
+mpr1 phi (In1 x) = phi id (mpr1 phi) x
 
 data Void
 
-data MuC_0 f    = InC_0 (f Void (MuC_0 f))
-data MuC_1 f i  = InC_1 (f Void (MuC_1 f) i)
-
--- course-of-values recursion
-                            {- out -}            {- cast -}          {- call -}
-type PhiC_0 f a = forall r. (r  -> f Void r)  -> (r  -> MuC_0 f)  -> (r  -> a)  -> f Void r  -> a
-type PhiC_1 f a = forall r. (r .-> f Void r)  -> (r .-> MuC_1 f)  -> (r .-> a)  -> f Void r .-> a
-
-unInC_0 (InC_0 x) = x
-unInC_1 (InC_1 x) = x
+data MuC_0   f    = InC_0   { unInC_0 :: f Void (MuC_0   f)   }
+data MuC_1 f i  = InC_1 { unInC_1 :: f Void (MuC_1 f) i }
+-- %\textcomment{course-of-values recursion%}   out               cast             call
+type PhiC_0   f a = forall r. (r -> f Void r) -> (r -> MuC_0   f) -> (r -> a)
+                    -> f Void r -> a
+type PhiC_1 f a = forall r. (r .-> f Void r) -> (r .-> MuC_1 f) -> (r .-> a)
+                    -> f Void r .-> a
 
 mcvpr0 :: PhiC_0 f a -> MuC_0 f  -> a
 mcvpr0 phi (InC_0 x) = phi unInC_0 id (mcvpr0 phi) x
@@ -39,88 +34,83 @@ mcvpr0 phi (InC_0 x) = phi unInC_0 id (mcvpr0 phi) x
 mcvpr1 :: PhiC_1 f a -> MuC_1 f .-> a
 mcvpr1 phi (InC_1 x) = phi unInC_1 id (mcvpr1 phi) x
 
-
-
-data MuP_0 f a    = InP_0 (f a (MuP_0 f a))    | Var_0 a
-data MuP_1 f a i  = InP_1 (f a (MuP_1 f a) i)  | Var_1 (a i)
-
--- iteration over PHOAS
-                            {- call -}
-type PhiP_0 f a = forall r. (r a  -> a) -> f a (r a)  -> a
+data Mu_0   f a    = In_0   (f a (Mu_0   f a))    | Var_0 a
+data Mu_1 f a i  = In_1 (f a (Mu_1 f a) i)  | Var_1 (a i)
+-- %\textcomment{iteration over PHOAS%}
+type PhiP_0 f a = forall r. (r a -> a) -> f a (r a) -> a
 type PhiP_1 f a = forall r. (r a .-> a) -> f a (r a) .-> a
 
-
-mphit0 :: PhiP_0 f a -> MuP_0 f a -> a 
-mphit0 phi (InP_0 x) = phi (mphit0 phi) x
+mphit0 :: PhiP_0 f a -> Mu_0 f a -> a 
+mphit0 phi (In_0 x) = phi (mphit0 phi) x
 mphit0 phi (Var_0 a) = a
 
-mphit1 :: PhiP_1 f a -> MuP_1 f a .-> a 
-mphit1 phi (InP_1 x) = phi (mphit1 phi) x
+mphit1 :: PhiP_1 f a -> Mu_1 f a .-> a 
+mphit1 phi (In_1 x) = phi (mphit1 phi) x
 mphit1 phi (Var_1 a) = a
 
 {-
-mphit0 :: PhiP_0 f a -> (forall a. MuP_0 f a) -> a 
+mphit0 :: PhiP_0 f a -> (forall a. Mu_0 f a) -> a 
 mphit0 phi x = mphit phi x where
-  mphit phi (InP_0 x) = phi (mphit phi) x
+  mphit phi (In_0 x) = phi (mphit phi) x
   mphit phi (Var_0 a) = a
 
-mphit1 :: PhiP_1 f a -> (forall a. MuP_1 f a i) -> a i
+mphit1 :: PhiP_1 f a -> (forall a. Mu_1 f a i) -> a i
 mphit1 phi x = mphit phi x where
-  mphit :: PhiP_1 f a -> MuP_1 f a .-> a
-  mphit phi (InP_1 x) = phi (mphit phi) x
+  mphit :: PhiP_1 f a -> Mu_1 f a .-> a
+  mphit phi (In_1 x) = phi (mphit phi) x
   mphit phi (Var_1 a) = a
 -}
 
 -- primitive recursion over PHOAS
                              {- cast -}             {- call -}
-type PhiPR_0 f a = forall r. (r a  -> MuP_0 f a) -> (r a  -> a) -> f a (r a)  -> a
-type PhiPR_1 f a = forall r. (r a .-> MuP_1 f a) -> (r a .-> a) -> f a (r a) .-> a
+type PhiPR_0 f a = forall r. (r a -> Mu_0 f a) -> (r a -> a) -> f a (r a) -> a
+type PhiPR_1 f a = forall r. (r a .-> Mu_1 f a) -> (r a .-> a) -> f a (r a) .-> a
 
-mphpr0 :: PhiPR_0 f a -> MuP_0 f a -> a 
+mphpr0 :: PhiPR_0 f a -> Mu_0 f a -> a 
 mphpr0 phi (Var_0 a) = a
-mphpr0 phi (InP_0 x) = phi id (mphpr0 phi) x
+mphpr0 phi (In_0 x) = phi id (mphpr0 phi) x
                                             
                                             
 
-mphpr1 :: PhiPR_1 f a -> MuP_1 f a .-> a 
+mphpr1 :: PhiPR_1 f a -> Mu_1 f a .-> a 
 mphpr1 phi (Var_1 a) = a
-mphpr1 phi (InP_1 x) = phi id (mphpr1 phi) x
+mphpr1 phi (In_1 x) = phi id (mphpr1 phi) x
                                             
 
 
 -- course-of-values iteration over PHOAS
 type PhiPC_0 f a = forall r. (r a  -> Maybe(f a (r a))) -- out
-                          -> (r a  -> MuP_0 f a) -- cast
+                          -> (r a  -> Mu_0 f a) -- cast
                           -> (r a  -> a) {- call -} -> f a (r a)  -> a
 type PhiPC_1 f a = forall r. (forall i. r a i-> Maybe(f a (r a) i)) -- out
-                          -> (r a .-> MuP_1 f a) -- cast
+                          -> (r a .-> Mu_1 f a) -- cast
                           -> (r a .-> a) {- call -} -> f a (r a) .-> a
--- unInP_0 :: MuP_0 f a -> Maybe (f a (MuP_0 f a))
-unInP_0 (InP_0 x) = Just x
-unInP_0 _         = Nothing
--- unInP_1 :: MuP_1 f a i -> Maybe (f a (MuP_1 f a) i)
-unInP_1 (InP_1 x) = Just x
-unInP_1 _         = Nothing
+-- unIn_0 :: Mu_0 f a -> Maybe (f a (Mu_0 f a))
+unIn_0 (In_0 x) = Just x
+unIn_0 _         = Nothing
+-- unIn_1 :: Mu_1 f a i -> Maybe (f a (Mu_1 f a) i)
+unIn_1 (In_1 x) = Just x
+unIn_1 _         = Nothing
 
-mphcv0 :: PhiPC_0 f a -> MuP_0 f a -> a
-mphcv0 phi (InP_0 x) = phi unInP_0 id (mphcv0 phi) x
+mphcv0 :: PhiPC_0 f a -> Mu_0 f a -> a
+mphcv0 phi (In_0 x) = phi unIn_0 id (mphcv0 phi) x
 mphcv0 phi (Var_0 a) = a
 
-mphcv1 :: PhiPC_1 f a -> MuP_1 f a .-> a
-mphcv1 phi (InP_1 x) = phi unInP_1 id (mphcv1 phi) x
+mphcv1 :: PhiPC_1 f a -> Mu_1 f a .-> a
+mphcv1 phi (In_1 x) = phi unIn_1 id (mphcv1 phi) x
 mphcv1 phi (Var_1 a) = a
 
 {-
-mphcv0 :: PhiPC_0 f a -> (forall a. MuP_0 f a) -> a
+mphcv0 :: PhiPC_0 f a -> (forall a. Mu_0 f a) -> a
 mphcv0 phi x = mphcv phi x where
-  mphcv :: PhiPC_0 f a -> MuP_0 f a -> a
-  mphcv phi (InP_0 x) = phi unInP_0 (mphcv phi) x
+  mphcv :: PhiPC_0 f a -> Mu_0 f a -> a
+  mphcv phi (In_0 x) = phi unIn_0 (mphcv phi) x
   mphcv phi (Var_0 a) = a
 
-mphcv1 :: PhiPC_1 f a -> (forall a. MuP_1 f a i) -> a i
+mphcv1 :: PhiPC_1 f a -> (forall a. Mu_1 f a i) -> a i
 mphcv1 phi x = mphcv phi x where
-  mphcv :: PhiPC_1 f a -> MuP_1 f a .-> a
-  mphcv phi (InP_1 x) = phi unInP_1 (mphcv phi) x
+  mphcv :: PhiPC_1 f a -> Mu_1 f a .-> a
+  mphcv phi (In_1 x) = phi unIn_1 (mphcv phi) x
   mphcv phi (Var_1 a) = a
 -}
 
@@ -140,41 +130,41 @@ class Functor2nd f => Positive f where
   lemmPositive :: f x r -> f y r
 
 -- cousre-of-values recursion fixpoint to primitive recursion fixpoint
-muc2mu :: Positive f => MuC_0 f -> Mu_0 f
+muc2mu :: Positive f => MuC_0 f -> Mu0 f
 muc2mu x = mcvpr0 phi x where
-  phi out cast call v = In_0 $ lemmPositive $ fmap2nd call v
+  phi out cast call v = In0 $ lemmPositive $ fmap2nd call v
 
 -- primitive recursion fixpoint to cousre-of-values recursion fixpoint
-mu2muc :: Positive f => Mu_0 f -> MuC_0 f
+mu2muc :: Positive f => Mu0 f -> MuC_0 f
 mu2muc x = mpr0 phi x where
   phi cast call v = InC_0 $ lemmPositive $ fmap2nd call v
 
 -- cousre-of-values recursion fixpoint to PHOAS fixpoint
-muc2mup :: Positive f => MuC_0 f -> MuP_0 f a
+muc2mup :: Positive f => MuC_0 f -> Mu_0 f a
 muc2mup x = mcvpr0 phi x where
-  phi out cast call v = InP_0 $ lemmPositive $ fmap2nd call v
+  phi out cast call v = In_0 $ lemmPositive $ fmap2nd call v
 
 -- PHOAS fixpoint to course-of-values recursion fixpoint
-mup2muc :: Positive f => (forall a.MuP_0 f a) -> MuC_0 f
+mup2muc :: Positive f => (forall a.Mu_0 f a) -> MuC_0 f
 mup2muc x = mphit0 phi x where
   phi call v = InC_0 $ lemmPositive $ fmap2nd call v
 
 -- PHOAS fixpoint to primitive recursion fixpoint
-mup2mu :: Functor2nd f => (forall a.MuP_0 f a) -> Mu_0 f
+mup2mu :: Functor2nd f => (forall a.Mu_0 f a) -> Mu0 f
 mup2mu x = mphit0 phi x where
-  phi call v = In_0 $ fmap2nd call v
+  phi call v = In0 $ fmap2nd call v
 
 
 -- -- PHOAS fixpoint to primitive recursion fixpoint
--- mup2mu' :: Functor2nd f => MuP_0 f a -> Mu_0 f
+-- mup2mu' :: Functor2nd f => Mu_0 f a -> Mu0 f
 -- mup2mu' x = mphit0 phi x where
---   phi call v = In_0 $ fmap2nd call v
+--   phi call v = In0 $ fmap2nd call v
 
 
 -- primitive recursion fixpoint to PHOAS fixpoint -- not meaningful 
-mu2mup :: Positive f => Mu_0 f -> MuP_0 f a
+mu2mup :: Positive f => Mu0 f -> Mu_0 f a
 mu2mup x = mpr0 phi x where
-  phi cast call v = InP_0 $ lemmPositive $ fmap2nd call v
+  phi cast call v = In_0 $ lemmPositive $ fmap2nd call v
 
 
 
@@ -189,11 +179,11 @@ type PhiC_1 f a = forall r i  .(forall i.  r i  -> (forall z.f z (MuC_1 f) i))  
 
 
 data E r_ r = App r r | Lam (r_ -> r) | Let r (r_ ->r)
-type Exp' a = MuP_0 E a
+type Exp' a = Mu_0 E a
 type Exp = forall a. Exp' a
-lam f = InP_0 (Lam (f . Var_0))
-app e1 e2 = InP_0 (App e1 e2)
-let_ e f = InP_0 (Let e (f . Var_0))
+lam f = In_0 (Lam (f . Var_0))
+app e1 e2 = In_0 (App e1 e2)
+let_ e f = In_0 (Let e (f . Var_0))
 
 vars = [ [i] | i <- ['a'..'z'] ] ++ [ i:show j | j<-[1..], i<-['a'..'z'] ]
 
@@ -227,11 +217,20 @@ reduce e = mphcv0 phi e where
 
 
 data ExprF r_ r = LET r (r_ -> r) | ADD r r | LIT Int
-type Expr' a = MuP_0 ExprF a
+type Expr' a = Mu_0 ExprF a
 type Expr = forall a. Expr' a
-eLet e f = InP_0 (LET e (f . Var_0))
-eAdd e1 e2 = InP_0 (ADD e1 e2)
-eLit n = InP_0 (LIT n)
+eLet e f = In_0 (LET e (f . Var_0))
+eAdd e1 e2 = In_0 (ADD e1 e2)
+eLit n   = In_0 (LIT n)
+-- constfold :: Expr -> Expr
+constfold e = mphit0 phi e where
+  phi cf (LET e f)   = eLet (cf e) (cf . f)
+  phi cf (LIT n)     = eLit n
+  phi cf (ADD e1 e2) = case (unIn_0 e1', unIn_0 e2') of
+                    (Just(LIT n), Just(LIT m)) -> eLit (n + m)
+                    _                          -> eAdd  e1'  e2'
+                 where e1' = cf e1
+                       e2' = cf e2
 
 evalExpr :: Expr -> Int
 evalExpr e = mphit0 phi e where
@@ -239,17 +238,7 @@ evalExpr e = mphit0 phi e where
   phi call (ADD e1 e2) = call e1 + call e2
   phi call (LET e f)   = call (f (call e))
 
-
-
--- TODO is it safe to do unInP_0 ????? could be cause we separated neg from pos
-constfold' :: Expr -> Expr
-constfold' e = mphit0 phi e where
-  phi cf (LET e f)   = eLet (cf e) (cf . f)
-  phi cf (LIT n)     = eLit n
-  phi cf (ADD e1 e2) = case (unInP_0 (cf e1), unInP_0 (cf e2)) of
-                         (Just(LIT n),Just(LIT m)) -> eLit(n+m)
-                         _                         -> eAdd (cf e1) (cf e2)
-
+{-
 constfold :: Expr -> Expr
 constfold e = mphcv0 phi e where
   phi out cast cf (LET e f)   = eLet (cf e) (cf . f)
@@ -258,7 +247,7 @@ constfold e = mphcv0 phi e where
     case (out (cf e1), out (cf e2)) of
       (Just(LIT n),Just(LIT m)) -> undefined -- eLit(n+m)
       _                         -> eAdd (cf e1) (cf e2)
-
+-}
 -- is ths type what we want????
 getLit e = mphit0 phi e where
   phi call (LIT n)     = Just(LIT n)

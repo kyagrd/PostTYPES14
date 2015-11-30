@@ -1,10 +1,11 @@
-\section{Ongoing work}
+\section{Further work}
+% \section{Ongoing work}
 \label{sec:ongoing}
-We have two threads of ongoing work regarding Mendler-style recursion schemes
-over mixed-variant datatypes ---
+We present two threads of further work regarding
+Mendler-style recursion schemes over mixed-variant datatypes ---
 Mendler-style primitive recursion with a sized index (\S\ref{sec:ongoing:mprsi})
 and
-Mendler-style parametric higher-order iteration (\S\ref{sec:ongoing:mphit}).
+Mendler-style parametric iteration (\S\ref{sec:ongoing:mphit}).\vspace*{-1.5ex}
 
 \subsection{Mendler-style primitive recursion with a sized index}
 \label{sec:ongoing:mprsi}
@@ -17,21 +18,27 @@ negative (or mixed-variant) datatypes. We demonstrated the usefulness of
 \begin{itemize}
 \item the string formatting function \lstinline{showExp} for
 	the untyped HOAS using \lstinline{msfcata0}
-	(Figure\;\ref{lst:HOASshow}) and
+	(Listing\;\ref{lst:HOASshow}),% and
 \item the type-preserving evaluator \lstinline{eval} for
 	the simply-typed HOAS using \lstinline{msfcata1}
-	(Figure\;\ref{lst:HOASeval}).
+	(Listing\;\ref{lst:HOASeval}).\vspace*{-.7ex}
 \end{itemize}
 
 In this subsection, we speculate about another Mendler-style recursion scheme,
 \lstinline{mprsi}, motivated by an example similar to the \lstinline{eval}
 function. The name \lstinline{mprsi} stands for
-Mendler-style primitive recursion with a sized index.
+Mendler-style primitive recursion with a sized index.\vspace*{.7ex}
+
+\lstinputlisting[
+	caption={A simply-typed HOAS evaluation via a user-defined value domain.
+		\label{lst:HOASevalV}
+		},
+	firstline=4]{HOASevalV.hs}\vspace*{-1ex}
 
 We review the \lstinline{eval} example and then compare
 it to our motivating example \lstinline{veval} for \lstinline{mprsi}.
 Both \lstinline{eval} and \lstinline{veval} are illustrated
-in Figure\;\ref{lst:HOASevalV}. Recall that this code is written in Haskell,
+in Listing\;\ref{lst:HOASevalV}. Recall that this code is written in Haskell,
 following the Mendler-style conventions.
 The function \lstinline{eval :: Exp t -> Id t} is
 a type preserving evaluator that evaluates an HOAS expression of type
@@ -39,15 +46,6 @@ a type preserving evaluator that evaluates an HOAS expression of type
 The \lstinline{eval} function always terminates because
 \lstinline{msfcata1} always terminates. Recall that \lstinline{msfcata1}
 and \lstinline{Rec1} can be embedded into System~\Fw.
-
-\begin{figure}
-\lstinputlisting[
-	caption={A simply-typed HOAS evaluation via a user-defined value domain.
-		\label{lst:HOASevalV}
-		},
-	firstline=4]{HOASevalV.hs}
-\vspace*{-3ex}
-\end{figure}
 
 The motivating example \lstinline{veval :: Exp t -> Val t} is also 
 a type-preserving evaluator. Unlike \lstinline{eval}, it evaluates to 
@@ -63,12 +61,12 @@ the corresponding equation in the definition of \lstinline{eval}.
 However, the use of \lstinline{unVal} is problematic. In particular,
 the definition of \lstinline{unVal} relies on pattern matching against
 \lstinline{In1}. Recall that one cannot freely pattern match against
-a recursive value in Mendler style. Recursive values must be analyzed
+a recursive value in the Mendler style. Recursive values must be analyzed
 (or eliminated) by using Mendler-style recursion schemes. It is not a problem
 to use \lstinline{unId} in the definition of \lstinline{eval} because
 \lstinline{Id} is non-recursive.
 
-It is not likely that \lstinline{unVal} can be defined using any of
+It is unlikely that \lstinline{unVal} can be defined using any of
 the existing Mendler-style recursion schemes. So, we designed
 a new Mendler-style recursion scheme that can express \lstinline{unVal}.
 The new recursion scheme \lstinline{mprsi} extends \lstinline{mprim} with
@@ -78,8 +76,8 @@ three abstract operations, call, cast, and uncast. In the following paragraphs,
 we explain the design of \lstinline{mprsi} step-by-step.
 
 Let us try to define \lstinline{unVal} using \lstinline{mprim1} and examine
-where it falls short. \lstinline{mprim1} provides two abstract operations,
-\lstinline{cast} and {call}, as it can be seen from the type signature below:
+where it falls short: \lstinline{mprim1} provides two abstract operations,
+\lstinline{cast} and {call}, as it can be seen from the type signature:
 \begin{lstlisting}
 mprim1 :: (forall r i. (forall i. r i -> Mu1 f i)  -- cast
               -> (forall i. r i -> a i)      -- call
@@ -90,7 +88,7 @@ We attempt to define \lstinline{unVal} using \lstinline{mprim1} as follows:
 unVal :: Mu1 V (t1 -> t2) -> (Mu1 V t1 -> Mu1 V t2)
 unVal = mprim1 phi where
   phi cast call (VFun f) = ...
-\end{lstlisting}
+\end{lstlisting}\vspace*{-1ex}
 Inside the \lstinline{phi} function, we have a function
 \lstinline{f :: (r t1 -> r t2)} over abstract recursive values.
 We need to cast \lstinline{f} into a function over concrete recursive values
@@ -120,11 +118,10 @@ mprsi1 :: (forall r i. (forall i. r i -> Mu1 f i)  -- cast
                -> (forall i. Mu1 f i -> r i)  -- uncast
                -> (forall i. r i -> a i)      -- call
                -> (f r i -> a i)        ) -> Mu1 f i -> a i
-
 mprsi1 phi (In1 x) = phi id id (mprsi1 phi) x
-\end{lstlisting}
+\end{lstlisting}\vspace*{-1ex}
 Although the type signature above is type-correct, it is too powerful.
-The Mendler-style uses types to forbid non terminating computations
+The Mendler-style uses types to forbid non-terminating computations
 as ill-typed. Having both \lstinline{cast} and \lstinline{uncast} supports
 the same ability as freely pattern matching over recursive values,
 which can lead to non-termination. To recover the guarantee of termination,
@@ -136,7 +133,7 @@ Let us see how this non-termination might occur. If we allowed
 an evaluator (similar to \lstinline{veval} but for an untyped HOAS),
 which does not always terminate. This evaluator would diverge for terms
 with self application.
-Here, We walk through the process of defining an untyped HOAS.
+Here, we walk through the process of defining an untyped HOAS.
 The base structures of the untyped HOAS and its value domain
 can be defined as follows:
 \begin{lstlisting}
@@ -149,7 +146,7 @@ it does not track the types of terms but remains constant everywhere.
 Using the naive version of \lstinline{mprsi1} above, we can write an evaluator
 similar to \lstinline{veval} for the untyped HOAS (\lstinline{Mu1 ExpF_u ()})
 via the value domain (\lstinline{Mu1 V_u ()}), which would obviously
-not terminate for some input.
+not terminate for some inputs.
 
 Why did we believe that \lstinline{veval} always terminates?
 Because it evaluates a well-typed HOAS, whose type is encoded as
@@ -157,7 +154,7 @@ an index \lstinline{t} in the recursive datatype \lstinline{(Exp t)}. That is,
 the use of indices as types is the key to the termination property.
 Therefore, our idea is to restrict the use of the abstract operations
 by enforcing constraints over their indices; in that way, 
-we would still be able write \lstinline{veval} for the typed HOAS,
+we would still be able to write \lstinline{veval} for the typed HOAS,
 but would get a type error when we try to write an evaluator for
 the untyped HOAS.
 
@@ -165,9 +162,9 @@ the untyped HOAS.
 We suggest that some of the abstract operations of \lstinline{mprsi1} should
 only be applied to the abstract values whose indices are smaller in size
 compared to the size of the argument index. For the \lstinline{veval} example,
-we define being smaller as the structural ordering over types, that is,
+the structural ordering over types can be given as
 \lstinline{t1 < (t1 -> t2)} and \lstinline{t2 < (t2 -> t1)}.
-We have two candidates for the type signature of \lstinline{mprsi1}:
+We have two candidates for the type signature of \lstinline{mprsi1}:\vspace*{.5ex}
 \begin{itemize}
 \item Candidate 1: restrict uses of both \lstinline{cast} and \lstinline{uncast}
 \begin{lstlisting}
@@ -199,43 +196,32 @@ However, existing theories on sized-types are not directly applicable to
 \lstinline{mprsi} because they are focused on positive datatypes, but
 not negative datatypes.
 
-
-\begin{figure}
 \lstinputlisting[
-	caption={Mendler-style parametric higher-order iteration
+	caption={Mendler-style parametric iteration
 		(\mphit{}) at kind $*$ and $*\to*$.
 		\label{lst:PRec}},
 	firstline=4]{PRec.hs}
-
-\lstinputlisting[
-	caption={The \lstinline{showExp} example revisited using \mphit{*}.
-		\label{lst:PHOASshow}},
-	firstline=5,lastline=18]{PHOASshow.hs}
-
-\lstinputlisting[
-	caption={Desugaring let-expressions into applicatinos (\aka\ let-inlining) using \mphit{*}.
-		\label{lst:PHOASdesug}},
-	firstline=20]{PHOASshow.hs}
-\end{figure}
-
-\subsection{Mendler-style parametric higher-order iteration}
-\label{sec:ongoing:mphit}
-Inspired by the conventional style iteration over PHOAS \cite{BahHvi12}
-(discussed in \S\ref{sec:relwork:PCDT}), we formulate its Mendler-style
-counterpart \emph{Mendler-style parametric higher-order iteration} (\mphit{}).
-Listing~\ref{lst:PRec} illsutrates Haskell transcription of \mphit{}
-at kind $*$ and $*\to*$. Note that datatype definitions of $\hat\mu$ and
-type signatures of \mphit{} at both kinds have virtually identical structure
-except for the index $i$ and that the implementations of \mphit{*} and
-\mphit{*\to*} have exactly the same structure.
-
-\begin{figure}
+\vspace*{-1.2ex}
+%% \lstinputlisting[
+%% 	caption={The \lstinline{showExp} example revisited using \mphit{*}.
+%% 		\label{lst:PHOASshow}},
+%% 	firstline=5,lastline=18]{PHOASshow.hs}
 \lstinputlisting[
 	caption={The \lstinline{eval} example revisited using \mphit{*\to*}.
 		\label{lst:PHOASeval}},
 	firstline=4]{PHOASeval.hs}
-\vspace*{-3ex}
-\end{figure}
+\vspace*{-2.8ex}
+
+\subsection{Mendler-style parametric iteration}
+\label{sec:ongoing:mphit}
+Inspired by the conventional style iteration over PHOAS \cite{BahHvi12}
+(discussed in \S\ref{sec:relwork:PCDT}), we formulate its Mendler-style
+counterpart \emph{Mendler-style parametric iteration} (\mphit{}).
+Listing~\ref{lst:PRec} illustrates Haskell transcription of \mphit{}
+at kind $*$ and $*\to*$. Note that datatype definitions of $\hat\mu$ and
+type signatures of \mphit{} at both kinds have virtually identical structure
+except for the index $i$ and that the implementations of \mphit{*} and
+\mphit{*\to*} have exactly the same structure.
 
 A notable difference from \msfit{},
 besides the extra parameter (\lstinline{r_}) in base functors
@@ -245,36 +231,54 @@ the type synonym definitions of \lstinline{Phi0} and \lstinline{Phi1}.
 For instance, \lstinline{(r a -> a)} is the type of
 the abstract recursive call provided by \mphit{*}.
 Recall that \msfit{} provides two abstract operations (abstract inverse
-and recursive call) while \mit{} provides one (recursive call only).
-As a result, first equations of \mphit{} in the definitions of \mphit{*} and
-\mphit{*\to*} are exactly the same in structure as the definitions of \MIt{*}
-and \MIt{*\to*} in Listing~\ref{lst:reccomb}. Hence, the revisited examples of
-\lstinline{showExp} (Listing~\ref{lst:PHOASshow}) and \lstinline{eval}
-(Listing~\ref{lst:PHOASshow}) become even more succinct than their corresponding
-examples using \msfit{} (Listings~\ref{lst:HOASshow} and \ref{lst:HOASeval}),
-simply omitting the uses of abstract inverse operations in the definitions
-of \lstinline{phi} functions. We can view that uses of inverse operations
-in \mphit{} are delegated to constructor functions of $\hat\mu$-types that
-involves contravariant recursive occurrences; for instance, \lstinline{lam}
-in Listing~\ref{lst:PHOASshow} is defined in terms of \lstinline{Var_0},
-which is the constructor of \lstinline{Mu_0} for injecting inverses.
+and recursive call) while \MIt{} provides one (recursive call only).
+As a result, the first equations of \mphit{} in the definitions of \mphit{*}
+and \mphit{*\to*} are exactly the same in structure as the definitions of
+\MIt{*} and \MIt{*\to*} in Listing~\ref{lst:reccomb}. Hence, the revisited
+example of \lstinline{eval} (Listing~\ref{lst:PHOASeval}) is more succinct
+than its corresponding example using \msfit{} (Listings~\ref{lst:HOASeval}),
+omitting \textit{inv} in the definition of the \lstinline{phi} functions.
+Note that the uses of \textit{inv} in \mphit{} are delegated to
+the constructor functions of $\hat\mu$-types, which involve
+contravariant recursive occurrences; for instance, \lstinline{lam}
+in Listing~\ref{lst:PHOASeval} is defined in terms of \lstinline{Var_1},
+which is the constructor of \lstinline{Mu_1} for injecting inverses.
+\vspace*{1ex}
+\lstinputlisting[
+	caption={Constant folding using \mphit{*}. \label{lst:PHOAScfold}},
+	firstline=219, lastline=233]{Rec2.hs}
+\vspace*{-1ex}
 
 Bahr and Hvited \cite{BahHvi12} exemplified the strength of their PHOAS-based
 iteration, compared to those \cite{FegShe96,bgb,AhnShe11} based on ordinary
-(or strong) HOAS, by defining a desugaring function that transforms
-let-expressions into applications (\aka\ let-inlining).
-In Listing~\ref{lst:PHOASdesug}, we illustrate the same example
-in Mendler style. Note the simplicity of our Mendler-style version
-(\lstinline{desugExp}) --- no need for class instances for functor,
-difunctor, or higher-order versions of such algebras.
+(or strong) HOAS, by defining a constant folding over a small language.
+In Listing~\ref{lst:PHOAScfold}, we illustrate the constant folding example
+in the Mendler style. Note the simplicity of our Mendler-style version
+--- no need for class instances for functor,
+difunctor, or higher-kinded versions of such algebras.
+One can freely use \lstinline{unIn_0} with \lstinline{mphit0}
+assuming that the recursive type \lstinline{Mu_0 f} is constructed
+following the convention that the first and second arguments of
+the base structure \lstinline{f :: * -> * -> *} are contravariant and covariant.
+For instance, \lstinline{r_} is contravariant and \lstinline{r} is covariant
+in the definition of \lstinline{ExpF}.
+Because \lstinline{Mu_0} is defined to be recursive only over the second
+covariant argument, the type system prevents \lstinline{unIn_0} from being
+applied to the first contravariant argument, assuming that the first argument
+type is different from the second arguments.  Within the context of
+\lstinline{phi :: (forall r. (r a->a) -> f a (r a) -> a)},
+the first and second arguments of \lstinline{f} cannot be the same type
+because \lstinline{a} is clearly not unifiable with \lstinline{(r a)}.
 
 Although we transcribed \mphit{} in Haskell, we have not yet proved
-its termination property. To prove its termination, we should find
+its termination property (neither did Bahr and Hvited \cite{BahHvi12}
+for their conventional version). To prove its termination, we should find
 an embedding of \mphit{} in a strongly normalizing calculus and study
 the equational properties of that embedding, just as we did for \msfit{}
-in \S\ref{sec:theory}. We think System \Fixw\ is a good candidate calculus
-for trying to embed \mphit{} because we can use polarized kinds to ensure
-that parameters \lstinline{r} and \lstinline{r_} are always used covariant
-and contravariant positions, respectively, in base functor definitions.
-Studying the relation between $\mu$ and $\hat\mu$, as we did for
-$\mu$ and $\mu'$ in \S\ref{sec:murec}, is another subject of future work.
+in \S\ref{sec:theory}. We think \Fixw\ and \Fwhat\ are good candidate calculi
+for embedding \mphit{} because they support polarized kinds.
+With polarized kinds, we can ensure that parameters \lstinline{r} and
+\lstinline{r_} are always used in covariant and contravariant positions,
+respectively, in base functor definitions. Studying the relation between
+$\mu$ and $\hat\mu$, as we did for $\mu$ and $\mu'$ in \S\ref{sec:murec},
+is another subject of future work.

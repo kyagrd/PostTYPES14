@@ -11,7 +11,7 @@ its Haskell definition discussed earlier.
 
 Next, we discuss the embedding of \msfit{*}
 into System~\Fw. The embedding of Mendler-style iteration with
-syntactic inverses should consist of a polymorphic encodings of
+syntactic inverses should consist of a polymorphic encoding of
 the inverse-augmented fixpoint operator ($\mu_{*}'$) and term encodings of
 its two constructors ($\textit{Inverse}_{*}$ and $\In{*}'$) and the eliminator
 (\msfit{*}). The embedding is not as simple as the embedding of $\mu_{*}$
@@ -34,62 +34,53 @@ applied to type constructors.
 
 \subsection{The embedding of \MIt{*} and its equational property}
 \label{sec:theory:mit}
-Mendler-style iteration (\MIt{*}) can be embedded into System~\Fw\ as follows
-\cite{AbeMatUus05,AhnShe11}:
+Mendler-style iteration (\MIt{*}) can be embedded into
+System~\Fw\ as follows \cite{AbeMatUus05,AhnShe11}:\vspace*{-1ex}
 \begin{align*}
 &\mu_{*} ~=~ \lambda F^{* \to *}.\forall X^{*}.
 		(\forall R^{*}.(R \to X) \to F R \to X) \to X
 	\\
 &\MIt{*} ~:~ \forall A^{*}.
-	(\forall R^{*}.(R \to A) \to F R \to A) \to \mu_{*} F \to A \\
+	(\forall R^{* \to *}.(R \to A) \to F R \to A) \to \mu_{*} F \to A
+\\[-.5ex]
 &\MIt{*}~\varphi~r ~=~ r~\varphi
 	\\
-&\In{*} ~:~\forall F^{* \to *}.F(\mu_{*} F) \to \mu_{*} F \\
-&\In{*}~x~\varphi ~=~ \varphi~(\MIt{*}~\varphi)~x
+&\In{*} ~:~\forall F^{* \to *}.F(\mu_{*} F) \to \mu_{*} F \\[-.5ex]
+&\In{*}~x~\varphi ~=~ \varphi~(\MIt{*}~\varphi)~x\\[-5ex]
 \end{align*}
 From the above embedding, one can derive the equational property of \MIt{*}
 apparent in the Haskell definition (Listing~\ref{lst:reccomb}) as follows:
 $\MIt{*}~\varphi~(\In{*}~x) = \In{*}~x~\varphi = \varphi~(\MIt{*}~\varphi)~x$.
 
 \subsection{Embedding \msfit{*}}\label{sec:theory:embed}
-We embed Mendler-style iteration with static inverses (\msfit{*})
-into System \Fw\ as follows:\footnote{A Haskell transcription of this embedding
-	appears in the previous work of Ahn and Sheard \cite{AhnShe11}.}
+The aim is to embed Mendler-style iteration with static inverses (\msfit{*})
+into System \Fw\ along the following lines.\footnote{
+	A Haskell transcription of this embedding appears
+	in the previous work of Ahn and Sheard \cite{AhnShe11}.}
+The embeddings for $\mu_{*}'$ and \msfit{*} can given as follows:\vspace*{-1ex}
 \begin{align*}
 &\mu_{*}' ~=~ \lambda F^{* \to *}.\lambda A^{*}.
 		K A + ((K A \to A) \to F(K A) \to A) \to A
 	\\
 &\msfit{*} ~:~ \forall A^{*}.
-	(\forall R^{*}.(A \to R A) \to (R A \to A) \to F(R A) \to A) \to
-	(\forall A^{*}.\mu_{*}' F A) \to A \\
+	(\forall R^{*\to*}.(A \to R A) \to (R A \to A) \to F(R A) \to A) \to
+	(\forall A^{*}.\mu_{*}' F A) \to A \\[-.5ex]
 &\msfit{*}~\varphi~r ~=~ r~\eta^{-1}~(\underbrace{\lambda f.f(\varphi~\eta)}_g)
+	\\[-6ex]
 \end{align*}
-\begin{align*}
-&\textit{Inverse}_{*} ~:~ \forall F^{*\to*}.\forall A^{*}.A \to \mu_{*}' F A \\
-&\textit{Inverse}_{*}~a ~=~ \inL (\eta~a)
-	\\
-&\In{*}' ~:~ \forall F^{*\to*}.\forall A^{*}.F(\mu_{*}' F A) \to \mu_{*}' F A \\
-&\In{*}'~x ~=~ \inR(\,\cdots\;\text{\color{blue}missing complete definition}\;\cdots)
-\end{align*}
-where $K = \lambda A^{*}.\forall X^{*}.(A \to X) \to X$,
-whose constructor ($\eta$) and eliminator ($\eta^{-1}$) are:
-\begin{align*}
-\eta &~:~ A \to KA &
-\eta^{-1} &~:~ KA \to A \\
-\eta &~=~ \lambda a.\lambda f.f~a : A \to KA &
-\eta^{-1} &~=~ \lambda \varphi.\varphi~\textit{id} : KA \to A
-\end{align*}
-$K$ is an embedding of the identity datatype (\lstinline{Id})
-in Listing~\ref{lst:HOASeval} where its data constructor (\lstinline{MkId}) and
-selector function (\lstinline{unId}) are embedded as $\eta$ and $\eta^{-1}$.
-The purpose of using \lstinline{Id} in Listing~\ref{lst:HOASeval}, which is to
-avoid higher-order unification in type inference, and the purpose of using $K$
-here are not related but just a coincidence. For later use in the discussion,
-we label the subterm $(\lambda f.f(\varphi~\eta))$ in the definition of
-\msfit{*} above as $g$.
-
-To understand the embedding of $\msfit{*}$, note that $r : \mu_{*}'$ and
-that $\mu_{*}'$ is defined as a sum type ($+$), whose polymorphic embedding is
+where $K = \lambda A^{*}.A$ is an identity type constructor, therefore,
+both $\eta: A \to KA$ and $\eta^{-1}: KA \to A$ are identity functions.
+We could have just erased $K$ in the embedding of $\mu_{*}'$ above,
+but having $K$ makes it syntactically more evident of the correspondence
+between this \Fw-embedding and the Haskell transcription
+in Listing~\ref{lst:HOASeval}.\footnote{
+	The purpose of identity datatype \lstinline{Id}
+	in Listing~\ref{lst:HOASeval} is to avoid higher-order unification
+	during type inference so that GHC can type check.}
+It is also easier to notice that $KA$ matches with $RA$ through
+polymorphic instantiation while type checking the definition of \msfit{*}.
+In the embedding of $\msfit{*}$, note that $r : \mu_{*}'\,F\,A$ and that
+$\mu_{*}'$ is defined using a sum type ($+$), whose polymorphic embedding is
 $A + B = \forall X^{*}.(A \to X) \to (B \to X) \to X$ and its two constructors
 $\inL : \forall A^{*}.\forall B^{*}.A \to A + B$ (left injection) and
 $\inR : \forall A^{*}.\forall B^{*}.B \to A + B$ (right injection) are
@@ -98,62 +89,78 @@ $\inR = \lambda b.\lambda f_1.\lambda f_2.f_2\;b$. The value $r$ selects
 $\eta^{-1} : KA \to A$ to handle $\textit{Inverse}_{*}$-values and selects
 $g$ to handle $\In{*}'$-values.
 
+
+Next, we need to embed the two data constructors of $\mu_{*}$,
+$\textit{Inverse}_{*}$ and $\In{*}'$.
+
+We were able to define a universal embedding of $\textit{Inverse}_{*}$
+that works for arbitrary $F$:\vspace*{-1ex}
+\begin{align*}
+&\textit{Inverse}_{*} ~:~ \forall F^{*\to*}.\forall A^{*}.A \to \mu_{*}' F A \\
+&\textit{Inverse}_{*}~a ~=~ \inL (\eta~a)
+\end{align*}
 From the embedding of $\textit{Inverse}_{*}$, we can derive the equational
-property of \msfit{*} over $\textit{Inverse}_{*}$-values, which is apparent in
-the Haskell definition of \msfit{*} in Listing\;\ref{lst:reccomb}, as follows:
+property of \msfit{*} over $\textit{Inverse}_{*}$-values, which is apparent
+in the Haskell definition of \msfit{*} in Listing\;\ref{lst:reccomb},
+as below:\vspace*{-1ex}
 \[
 \msfit{*}~\varphi~(\textit{Inverse}_{*} a) =
 (\textit{Inverse}_{*}~a)~\eta^{-1}~g
 = \inL~(\eta~a)~\eta^{-1}~g = \eta^{-1}(\eta~a) = a
 \]
-We leave it as an exercise for the reader to observe that
-$\eta^{-1}(\eta~a) = a$.
 
-Unfortunately, our embedding is not yet complete for $\In{*}'$.
-We know that it must be in the form of a right injection using $\inR$,
-but we were not able to come up with an embedding of $\In{*}'$
-in its stand-alone form.\footnote{
+However, we have not been able to define a universal embedding of $\In{*}'$
+in System \Fw. What we know is that the embedding of $\In{*}'$ must be
+in the form of a right injection ($\inR$):\vspace*{-1ex}\footnote{%
 	It was also the case in the previous work of Ahn and Sheard
 	\cite{AhnShe11}, but was not clearly stated in the text.}
-However, we were able to give embeddings for the constructor functions
-of each individual recursive types,  when a particular base structure $F$
-was given. For instance, we can embed the recursive type \lstinline{Exp'}
+\begin{align*}
+&\In{*}' ~:~ \forall F^{*\to*}.\forall A^{*}.F(\mu_{*}' F A) \to \mu_{*}' F A \\
+&\In{*}'~x ~=~ \inR(\,\cdots\;\text{\color{blue}missing complete definition}\;\cdots)
+	\\[-5ex]
+\end{align*}
+We believe that we can find an embedding of $\In{*}'$ for each $F$ when
+the definition of $F$ is given concretely (see Appendix~\ref{sec:appendix}).
+That is, we can embed constructor functions of a recursive type $\mu{*}' F$
+for each specific $F$.\footnote{
+	Similarly, all regular recursive types can be embedded into System \F,
+	but not $\mu_{*}$ itself.}
+For instance, we can embed the constructor functions of \lstinline{Exp'}
 in Listing\;\ref{lst:HOASshow} and its two data constructors \textit{lam}
-and \textit{app} into System~\Fw, as follows:\footnote{
-	The use of $\In{*}'$ here is only a conceptual illustration. We do not
-	have an embedding for the stand-alone $\In{*}'$ in System~\Fw.}
+and \textit{app} into System~\Fw, as below:\vspace*{-1ex}\footnote{
+	The use of $\In{*}'$ here is only a conceptual illustration
+	because we have embedded $\In{*}'$ itself into System~\Fw.
+	We also labeled some of the subterms ($v$, $w$, and $h$)
+	for later use in the discussion.}%
+\label{align:embed}%
 \begin{align*}
 \textit{lam}&~:~\forall A^{*}.
-		(\textit{Exp}'~A \to \textit{Exp}'~A) \to \textit{Exp}'~A \\
+		(\textit{Exp}'~A \to \textit{Exp}'~A) \to \textit{Exp}'~A
+\\[-3ex]
 \textit{lam}&~f~=~\In{*}'(\textit{Lam}~f)
 = \inR~(\underbrace{
 	\lambda \varphi'.\varphi'~\eta^{-1}~
 	(\overbrace{\textit{Lam}(\lambda y.\textit{lift}~\varphi'~(f(\inL~y))) }^v)\;
 	}_w)
-\end{align*}
-\vspace*{-4ex}
-\begin{align*}
+\\[-1.5ex]
 \textit{app}&~:~\forall A^{*}.
 		\textit{Exp}'~A \to \textit{Exp}'~A \to \textit{Exp}'~A \\
 \textit{app}&~r_1~r_2 = \In{*}'(\textit{App}~r_1~r_2)
 = \inR~(\underbrace{
 		\lambda \varphi'.\varphi'~\eta^{-1}~
 		(\textit{App}~(\lift~\varphi'~r_1)~(\lift~\varphi'~r_2))}_h)
-\end{align*}
-where \textit{lift} is defined as follows:
+\end{align*}~\vspace*{-4.5ex}\\
+where \textit{lift} is defined as follows:\vspace*{-1ex}
 \begin{align*}
 & \lift~:~(\forall A^{*}.(K A\to A)\to F(K A)\to A)\to \mu_{*}' F A\to K A\\
 & \lift~\varphi'~r ~=~ r~\textit{id}~(\lambda z.\eta(z~\varphi'))
 \end{align*}
-We also label some of the subterms ($v$, $w$, and $h$)
-in the embeddings of \textit{lam} and \textit{app} for
-later use in the discussion.
 
 Recall that $\mu_{*}'$ is a sum type. The \textit{lift} function converts
 $(\mu_{*}'FA)$-values to $(KA)$-values when given a function
 $\varphi' : \forall A^{*}.(KA \to A) \to F(K A) \to A$.
 Observe that the type of $\varphi'$ matches with the partial application of
-$\varphi$, the first argument of \textit{msfit}, applied to $\eta$ Since
+$\varphi$, the first argument of \textit{msfit}, applied to $\eta$. Since
 $\varphi : \forall R^{*}.(A \to R A) \to (R A \to A) \to F(R A) \to A$
 and $\eta : A \to K A$, we first instantiate $R$ with $K$ in the type of
 $\varphi$, that is, $(A \to K A) \to (K A \to A) \to F(K A) \to A$.
@@ -162,32 +169,28 @@ the type of $\varphi'$, the first argument of \textit{lift}.
 
 We use \textit{lift} for the recursive values that are covariant,
 in order to convert from $F(\mu_{*}'FA)$-structures, or $F(RA)$-structures,
-to $F(KA)$-structures -- recall the type of the $varphi'$.
-We lift recursive values $r_1$ and $r_2$, which both covariant,
+to $F(KA)$-structures -- recall the type of the $\varphi'$.
+We lift recursive values $r_1$ and $r_2$, which are both covariant,
 in the embedding of \textit{app}. We also lift the value resulting from $f$,
 whose return type is $F(\mu_{*}'FA)$, in the embedding of \textit{lam},
 since the right-hand side of the function type is covariant.
 
 For recursive values needed in contravariant positions, we simply left inject
 answer values. For example, $y$ in the embedding of \textit{lam} has type $KA$
-since we expect argument to $Lam$ be $KA \to KA$ because we expect $v : F(KA)$,
-which is the second argument to be applied to $\varphi'$. To convert from
-$(KA)$ to $\mu_{*}'FA$, we only need to left inject, that is, $(\inL~y)$,
+since we expect the argument to $Lam$ be of type $KA \to KA$
+because we expect $v : F(KA)$, which is the second argument to be
+applied to $\varphi'$. To convert from $(KA)$ to $\mu_{*}'FA$,
+we only need to left inject, that is, $(\inL~y)$,
 which can be applied to $f : \mu_{*}'FA \to \mu_{*}'FA$.
 
-We strongly believe that it is possible to give an embedding for
-any recursive type in this way,\footnote{This is analogous to the situation
-	that all regular recursive types can be embedded into System \F,
-	but not the fixpoint operator $\mu_{*}$ itself.}
-that is, by lifting $(\textit{lift}~\varphi)$ the recursive values in
-covariant positions and by left injecting ($\inL$) the answer values\footnote{
-	More precisely, $\eta$ applied answer values
-	since the type we expect is not $A$ but $K A$.}
-when recursive values are needed in contravariant positions.
-Detailed investigations for the generlized procedure to derive embeddings for
-$\mu'_{\kappa} F$ where $F : \kappa \to \kappa$ is left for future work.
-In addition, it would be an interesting theoretical quest to search for
-a calculus that can directly embed the constructor
+We believe that it is possible to give an embedding for any recursive type
+in this way, that is, by lifting $(\textit{lift}~\varphi)$ the recursive values
+in covariant positions and by left injecting ($\inL$) the answer values
+when recursive values are needed in contravariant positions. A type-directed
+algorithm for deriving the embeddings of the constructor functions of
+$\mu'_{*} F$ for each given $F : * \to *$ is described
+in Appendix~\ref{sec:appendix}). It would be an interesting theoretical quest
+to search for a calculus that can directly embed the constructor
 $\In{*}' : \forall F^{*\to*}.\forall A^{*}.F(\mu'_{*} F A) \to \mu'_{*} F A$.
 
 In the remainder of this section, we discuss the equational properties
@@ -195,12 +198,11 @@ of \msfit{*} over $\In{*}'$-values of the type \lstinline{Exp}. That is,
 when \msfit{*} is applied to the values constructed either by \textit{app}
 or by \textit{lam}.
 
-%% \[ A \xrightarrow{\eta} KA \xrightarrow{\inL} \mu'_{*} = KA+((KA \to A) \to F(KA) \to A) \to A \]
 \subsection{Equational properties of \msfit{*} over
 	values constructed by \textit{lam}}
 	\label{sec:theory:eqlam}
 When applied to $(\textit{lam}~f)$, we expect \msfit{*} to
-satisfy the following equation:
+satisfy the following equation:\vspace*{-1ex}
 \begin{equation}
 \msfit{*}~\varphi~(\textit{lam}~f)
 \stackrel{?}{=} \varphi~\eta~\eta^{-1}
@@ -216,8 +218,9 @@ instantiates to $K$ in the right-hand side of Equation~(\ref{eqn:msfitLam}).
 We use $\inL$ to convert $y : KA$, to a value of $\mu_{*}' F A$
 in order to apply it to $f : \mu_{*}' F A \to \mu_{*}' F A$.
 
-The left-hand side of Equation~(\ref{eqn:msfitLam}) expands as below,
-by expanding the definitions of \msfit{*}, $\inR$, $g$, and  $w$:
+The left-hand side of Equation~(\ref{eqn:msfitLam}) can be expanded
+using the definitions of \msfit{*}, $\inR$, $g$, and $w$,
+as below:\vspace*{-1ex}
 \begin{align*}
 \msfit{*}~\varphi~(\textit{lam}~f)
 &~=~ (\textit{lam}~f)~\eta^{-1}~g \\
@@ -227,27 +230,26 @@ by expanding the definitions of \msfit{*}, $\inR$, $g$, and  $w$:
 &~=~ \varphi~\eta~\eta^{-1}~(\textit{Lam}(\lambda y.\psi))
 \end{align*}
 where $\psi = (f(\inL~y))~\textit{id}~(\lambda z.\eta(z(\varphi\eta)))$.
+
 The resulting equation is similar in structure to the right-hand side of
 Equation~(\ref{eqn:msfitLam}). Thus, justifying Equation~(\ref{eqn:msfitLam})
-amounts to showing the equation below:
+amounts to showing:\vspace*{-1ex}
 \begin{equation}
 \psi \stackrel{?}{=} \eta(\msfit~\varphi~(f(\inL~y))))
 \label{eqn:msfitPsi}
 \end{equation}
-
-The right-hand side of Equation~(\ref{eqn:msfitPsi}) expands as follows:
+The right-hand side of Equation~(\ref{eqn:msfitPsi}) expands as follows:\vspace*{-1ex}
 \[ \eta(\msfit~\varphi~(f(\inL~y)))) = \eta(\inL~\psi~\eta^{-1}~g)
-	= \eta(\eta^{-1}~\psi)
+	= \eta(\eta^{-1}~\psi) = \psi
 \]
-We need to show that $\psi=\eta(\eta^{-1}\psi)$ for any (type-correct) $\psi$.
-That is, we need to consider $\eta \circ \eta^{-1}$,
-is effectively equivalent to an identity over $KA$ for any type $A$.
+In the last step of $\eta(\eta^{-1}\psi)=\psi$, we relied on the fact that
+$\eta$ and $\eta^{-1}$ are identity functions.
 
 \subsection{Equational properties of \msfit{*} over
 	values constructed by \textit{app}}
 	\label{sec:theory:eqapp}
 When applied to $(\textit{app}~r_1~r_2)$, we expect \msfit{*} to
-recurse on each of $r_1$ and $r_2$, as follows.
+recurse on each of $r_1$ and $r_2$, as follows:\vspace*{-1ex}
 \begin{equation}
 \msfit{*}~\varphi~(\textit{app}~r_1~r_2)
 \stackrel{?}{=}
@@ -261,9 +263,8 @@ since we need $(\textit{App}~(\eta(\msfit{*}~\varphi~r_1))
 to have type $F(KA)$. The type of $\varphi$ expects a value of type $F(RA)$
 as its third argument, where $R$ is a polymorphic type variable, which
 instantiates to $K$ in the right-hand side of Equation~(\ref{eqn:msfitApp}).
-
-The left-hand side of Equation~(\ref{eqn:msfitApp}) expands as below,
-by expanding the definitions of \msfit{*}, $\inR$, $g$, and  $h$:
+By using the definitions of \msfit{*}, $\inR$, $g$, and  $h$,
+the left-hand side of Equation~(\ref{eqn:msfitApp}) expands as follows:\vspace*{-1ex}
 \begin{align*}
 \msfit{*}~\varphi~(\textit{app}~x~y)
 &~=~ (\textit{app}~r_1~r_2)~\eta^{-1}~g \\
@@ -273,12 +274,12 @@ by expanding the definitions of \msfit{*}, $\inR$, $g$, and  $h$:
 \end{align*}
 The resulting expression is similar in structure to the right-hand side of
 Equation~(\ref{eqn:msfitApp}). Thus, justifying Equation~(\ref{eqn:msfitApp})
-amounts to showing the equation below:
+amounts to showing:\vspace*{-1ex}
 \begin{equation}
 \eta(\msfit{*}~\varphi~r) \stackrel{?}{=} \lift~(\varphi\eta)~r
 \label{eqn:msfitLift}
 \end{equation}
-When $r = \inR~z$, Equation~(\ref{eqn:msfitLift}) is justified as follows:
+When $r = \inR~z$, Equation~(\ref{eqn:msfitLift}) is justified as follows:\vspace*{-1ex}
 \begin{align*}
 \eta(\msfit{*}~\varphi~(\inR~z))
 &~=~ \eta(\inR~z~\eta^{-1}~g) ~=~ \eta(g~z) ~=~ \eta(z(\varphi\eta)) \\
@@ -286,60 +287,14 @@ When $r = \inR~z$, Equation~(\ref{eqn:msfitLift}) is justified as follows:
  ~=~ \lift~(\varphi\eta)~(\inR~z)
 \end{align*}
 When $r = \inL~z$,
-The left-hand side of Equation~(\ref{eqn:msfitLift}) expands as below
-\[ \eta(\msfit{*}~\varphi~r) ~=~\eta(\inL~z~\eta^{-1}~g) = \eta(\eta^{-1}z)
-\]
-and the right-hand side of Equation~(\ref{eqn:msfitLift}) expands as below
+the right-hand side of Equation~(\ref{eqn:msfitLift}) expands as below:\vspace*{-1ex}
 \[ \lift~\varphi~(\inL~z)
    ~=~ (\inL~z)~\textit{id}~(\lambda z.\eta(z.(\varphi\eta)))
    ~=~ \textit{id}~z = z
 \]
-We need to show that $\eta(\eta^{-1}z) = z$ for any (type-correct) $z$.
-That is, we need to consider $\eta \circ \eta^{-1}$
-is effectively equivalent to an identity over $KA$ for any type $A$.
-
-
-\subsection{Discussions on the section--retraction pair of $K$}
-	\label{sec:theory:srpair}
-The composition $\eta \circ \eta^{-1}$ is the section--retraction pair of $K$,
-which is the impredicative encoding of the identity datatype. When designing
-a type-safe language supporting datatypes, we typically expect
-\emph{canonical forms lemma} to hold on datatypes; that is, any value
-(or canonical form) of a datatype must be an application form lead by
-one of the data constructors of that datatype. For instance,
-when canonical forms lemma holds, values of the boolean datatype
-\lstinline{data Bool  =  False | True} is either \lstinline{False}
-or \lstinline{True} and values of the identity type
-(\lstinline{data K a =  eta a}) always has the form \lstinline{eta v}
-because \lstinline{eta} is the only data constructor of \lstinline{K}.
-Then, 
-$(\eta \circ \eta^{-1})(\eta\,t) = \eta((\eta^{-1}\circ\eta) t) = \eta\,t$.
-Thus, it is safe to assume that $\eta \circ \eta^{-1}$ is effectively
-equivalent to the identity function over $KA$ for any type $A$.
-
-We do not expect it is possible to establish the equational properties of
-\msfit{} purely within System \Fw; that is neither using
-$\beta$($\eta$)-equivalence nor trying to canonical forms lemma on
-over the impredicative encoding of the identity type seem promising.
-Thus, we conclude that the \Fw-embedding of \msfit{} exhibits
-its desired equational properties up to the section--retraction pair of $K$.
-This is slightly different status from the \Fw-embedding of \MIt{}
-discussed in \S\ref{sec:theory:mit}, which exhibits its desired
-equational properties purely within System \Fw. We do not see this as
-a problem because it is considered safe (\ie, maintain type preservation,
-strong normalization, and logical consistency) to extend System \Fw\ with
-non-recursive datatypes. For our purpose of showing termination of \msfit{},
-we only need to extend System \Fw\ with just the identity datatype.
-
-%% http://math.stackexchange.com/questions/73342/is-there-a-name-for-a-section-and-a-retraction-together
-
-%% \[ \varphi \mapsto \varphi \mapsto \lambda f . f(\varphi~\textit{id}) \]
-%% 
-%% Section retraction since not same as $\varphi$
-
-
-%% TODO other things: do we need to talk about codensity monad
-%% $K_T = \lambda A^{*}.\forall X^{*}.(A \to T X) \to T X$
-%% somewhere ??? maybe not necessary ...
-
+and the left-hand side of Equation~(\ref{eqn:msfitLift}) expands as below
+\[ \eta(\msfit{*}~\varphi~r) ~=~\eta(\inL~z~\eta^{-1}~g) = \eta(\eta^{-1}z) = z
+\]
+In the last step of $\eta(\eta^{-1}z)=z$, we relied on the fact that
+$\eta$ and $\eta^{-1}$ are identity functions.
 

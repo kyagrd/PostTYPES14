@@ -4,7 +4,7 @@ HSSRC=PHOASshow.hs PHOASeval.hs \
       HOASshow.hs HOASeval.hs HOASevalV.hs Exp2Expr.hs Len.hs
 
 TEXSRC=main.tex intro.tex mendler.tex eval.tex murec.tex theory.tex \
-       related.tex ongoing.tex summary.tex appendix.tex
+       related.tex ongoing.tex summary.tex
 
 ## all: pdf
 

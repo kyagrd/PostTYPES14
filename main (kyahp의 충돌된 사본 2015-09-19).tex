@@ -74,16 +74,12 @@ mixed-variant datatypes, negative datatypes, termination, normalization}
 \newcommand{\MsfIt}[1]{\ensuremath{\textbf{\textit{msfit}}_{#1}}}
 \newcommand{\msfit}[1]{\ensuremath{\textbf{\textit{msfit}}_{#1}}}
 \newcommand{\mprsi}[1]{\ensuremath{\textbf{\textit{mprsi}}_{#1}}}
-\newcommand{\mcvpr}[1]{\ensuremath{\textbf{\textit{mcvpr}}_{#1}}}
-\newcommand{\mphit}[1]{\ensuremath{\textbf{\textit{mphit}}_{#1}\,}}
-\newcommand{\mphpr}[1]{\ensuremath{\textbf{\textit{mphpr}}_{#1}}}
-\newcommand{\mphcv}[1]{\ensuremath{\textbf{\textit{mphcv}}_{#1}}}
+\newcommand{\mphit}[1]{\ensuremath{\textbf{\textit{mphit}}_{#1}}}
 \newcommand{\lift}[0]{\textit{lift}}
 \newcommand{\In}[1]{\ensuremath{\textbf{\textit{In}}_{#1}}}
-\newcommand{\InC}[1]{\ensuremath{\textbf{\textit{In}}^{_{\textbf{\textit{C}}}}_{#1}}}
-\newcommand{\unInC}[1]{\ensuremath{\textbf{\textit{In}}^{_{\textbf{\textit{C}}}\;-\!1}_{#1}}}
+\newcommand{\InC}[1]{\ensuremath{\textbf{\textit{In}}^{c}_{#1}}}
+\newcommand{\unInC}[1]{\ensuremath{\textbf{\textit{In}}^{\!c\,-\!1}_{#1}}}
 \newcommand{\hatIn}[1]{\ensuremath{\textbf{\textit{I\^n}}_{#1}}}
-\newcommand{\hatunIn}[1]{\ensuremath{\textbf{\textit{I\^n}}^{-1}_{#1}}}
 \newcommand{\inL}[0]{\textit{in}_{L}}
 \newcommand{\inR}[0]{\textit{in}_{R}}
 
@@ -106,11 +102,6 @@ mixed-variant datatypes, negative datatypes, termination, normalization}
  	literate=
  		{forall}{{$\forall$}}1
  		{:}{{$:$}}1
- 		{:->}{{$:\to$}}2
- 		{:+:}{{$\,:\!\!+\!\!:\,$}}2
-		{:$}{{$:${\rm\textdollar}}}1
- 		{:*}{{$\,:\!\!\times\,$}}2
- 		{:*:}{{$\,:\!\!\times\!\!:\,$}}2
  		{;}{{$;$}}1
  		{::}{{$::$}}1
  		{.->}{{\!.$\to$\,}}2
@@ -118,20 +109,15 @@ mixed-variant datatypes, negative datatypes, termination, normalization}
  		{=}{{$=$}}1
  		{=>}{{$\Rightarrow$}}2
  		{*}{{$*$}}1
-		{/=}{{$\neq$}}1
  		{\\}{{$\lambda$}}1
  		{eta}{{$\eta$}}1
 		{Phi0}{{Phi$_{*}$}}3
 		{Phi1}{{Phi$_{*\to*}$}}5
-		{PhiC_0}{{Phi$^{\,C}_{*}$}}3
-		{PhiC_1}{{Phi$^{\,C}_{*\to*}$}}5
 		{Phi0'}{{Phi$_{*}^{\phantom{.}\prime}$}}3
 		{Phi1'}{{Phi$_{*\to*}^{\phantom{.}\prime}$}}5
 		{Mu_0}{{$\hat\mu_{*}$}}1
 		{Mu0}{{$\mu_{*}$}}1
 		{In_0}{{\hatIn{*}}}2
-		{unIn_0}{{\hatunIn{*}}}3
-		{unIn_1}{{\hatunIn{*\to*}}}4
 		{In0}{{\In{*}}}2
 		{out0}{{out$_{*}$}}3
 		{Mu_1}{{$\hat\mu_{*\to*}$}}3
@@ -164,47 +150,27 @@ mixed-variant datatypes, negative datatypes, termination, normalization}
 		{id}{{\textit{id}}}2
  		{t1}{{$t_1$}}1
  		{t1}{{$t_1$}}1
- 		{tn}{{$t_n$}}1
  		{t2}{{$t_2$}}1
  		{e1}{{$e_1$}}1
  		{e2}{{$e_2$}}1
- 		{p'}{{$p^\prime$}}1
- 		{e1'}{{$e_1^\prime$}}1
- 		{e2'}{{$e_2^\prime$}}1
 		{pr}{{pr}}2
 		{times}{{times}}4
 		{mpr}{{mpr}}3
-		{mpr0}{{\mpr{*}}}4
-		{mpr1}{{\mpr{* \to *}}}6
+		{mpr0}{{mpr$_{*}$}}4
+		{mpr1}{{mpr$_{* \to *}$}}6
 		{mprim}{{\mpr{}}}3
 		{mprim0}{{\mpr{*}}}4
 		{mprim1}{{\mpr{* \to *}}}6
 		{mprsi}{{\mprsi{}}}5
 		{mprsi1}{{\mprsi{* \to *}}}7
-		{mcvpr}{{\mcvpr{}}}5
-		{mcvpr0}{{\mcvpr{*}}}6
-		{mcvpr1}{{\mcvpr{* \to *}}}8
-		{mphpr}{{\mphpr{}}}5
-		{mphpr0}{{\mphpr{*}}}6
-		{mphpr1}{{\mphpr{* \to *}}}8
-		{mphcv}{{\mphcv{}}}5
-		{mphcv0}{{\mphcv{*}}}6
-		{mphcv1}{{\mphcv{* \to *}}}8
 		{uncast}{{uncast}}6
-		{out}{{out}}2
 		{cast}{{cast}}3
 		{call}{{call}}3
 		{fac}{{fac}}2
 		{zero}{{zero}}3
 		{succ}{{succ}}3
 		{pred}{{pred}}3
-		{All}{{All}}2
-		{Lift}{{Lift}}3
-		{lift}{{lift}}2
-		{Unit}{{Unit}}3
 		{Void}{{Void}}3
-		{Sig}{{Sig}}3
-		{flipSig}{{flipSig}}5
 		{factorial}{{factorial}}6
 		{unVal}{{un\!Val}}4
 		{mcata}{{\MIt{}}}3
@@ -244,23 +210,12 @@ mixed-variant datatypes, negative datatypes, termination, normalization}
 		{Bool}{{Bool}}4
 		{List}{{List}}3
 		{Int}{{Int}}3
-		{Fst}{{Fst}}3
-		{Snd}{{Snd}}3
-		{Cunit}{{Cunit}}4
 		{inv}{{inv}}3
 		{nil}{{nil}}2
 		{len}{{len}}3
 		{length}{{length}}4
 		{cons}{{cons}}3
-		{LET}{LET}3
-		{LIT}{LIT}3
-		{ADD}{ADD}3
-		{cf}{cf}1
-		{eLet}{eLet}3
-		{eLit}{eLit}3
-		{eAdd}{eAdd}3
 		{const}{const}4
-		{constfold}{{constfold}}6
 		{ev}{{ev}}2
 		{val}{{val}}2
 		{eval}{{eval}}3
@@ -316,7 +271,7 @@ a simply-typed HOAS evaluator (without translation through first-order syntax)
 that is equipped with correct-by-construction proofs (in the Curry--Howard
 sense) of both type-preservation and normalization. We also develop further
 theoretical discussions on the \Fw-embedding of \msfit{}
-and introduce further studies on two new recursion schemes
+and introduce ongoing studies on two new recursion schemes
 (\mprsi{} and \mphit{}), which are also useful for mixed-variant datatypes.
 We hope our work motivates future design of
 logical reasoning systems that support a wider range of datatypes,
@@ -334,8 +289,10 @@ including mixed-variant ones.
 
 \section*{Acknowledgements}
 %% \subparagraph*{Acknowledgements}
-Thanks to Gabor Greif and Keewon Seo for their proofreading, and
-Ralph Matthes for his suggestion on looking into interpolation.
+Thanks to Gabor Greif, Keewon Seo, and Ralph Matthes for their comments.
+
+%% \appendix
+%% \section{TODO Appendix Section}
 
 %%% TODO
 %% Syntactic consideration of recursive types. about LICS 96. Fiore.
@@ -345,13 +302,24 @@ Ralph Matthes for his suggestion on looking into interpolation.
 %% in the conclusion:
 %% open problem need for theory/methods to expressiveness (difference)
 
+%%% TODO Matthes PTCS 01 paper. factoring or deriving In' for generic F
 %%% discuss in conclusion ????
 %% mit vs msfit vs etc
 \bibliography{main}
 
 \newpage
 \appendix
-\input{appendix}
+\section*{Appendix A}
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+\lstinputlisting[
+	caption={List length example using \lstinline{mcata0} \label{lst:TODO}},
+	firstline=3]{Rec2.hs}
+
 
 \end{document}
 
